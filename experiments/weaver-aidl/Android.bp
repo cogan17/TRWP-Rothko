@@ -10,3 +10,18 @@ cc_library_static {
     ],
     cflags: ["-Wall", "-Wextra", "-Werror"],
 }
+
+ // Experimental opt-in link probe. Never included in the recovery image.
+ // Build only after checking recovery variants and obtaining owner approval.
+cc_binary {
+    name: "rothko_weaver_aidl_link_probe",
+    srcs: ["LinkProbe.cpp"],
+    local_include_dirs: ["."],
+    recovery_available: true,
+    installable: false,
+    shared_libs: [
+        "android.hardware.weaver-V2-ndk",
+        "libbinder_ndk",
+    ],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
