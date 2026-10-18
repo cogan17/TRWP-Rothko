@@ -106,3 +106,20 @@ Draft PR #2 and Issue #1 remain the single tracking artifacts; HOLD merge and sq
 
 ### Next task — stage 58
 Inspect generated NDK AIDL API signatures and Binder exception/status mapping for further source-level defects, particularly response `std::vector<int8_t>` conversion, exception constants, and correct service-specific error codes. Apply only provable minimal fixes, update source guardrails, and keep the prototype isolated. Do not repeat device diagnostics or previous audit. Any compilation/Actions/flashing requires separate owner authorization under established guardrails.
+
+
+## Checkpoint update — stages 58–62 (2026-10-18)
+
+**Resume at stage 63.** This section supersedes the older stage 58 task. No previously completed stage needs repeating.
+
+- Stage 58: reviewed Weaver AIDL NDK response conversion, service-specific Binder errors, timeout handling, and fail-closed behavior. Signed `byte[]` response can be copied into unsigned result bytes via iterator `assign`; no code change required. Documentation commit `f6cb2c64a19ebf0b2d84e805b18510dcd03681d1`.
+- Stage 59: confirmed TeamWin `android_hardware_interfaces` `android-14.1` Weaver AIDL `Android.bp` has frozen versions 1/2 and `vendor_available: true` but no explicit `recovery_available: true`. Recovery NDK library variant **unverified**. Documentation commit `646885b5c9a04472f7c9f52ca1703949e6a165fa`.
+- Stage 60: decided to preserve the opt-in prototype's recovery variant requirement, not silently substitute a system-only build. Actual Soong dependency graph and HAL availability remain open. Documentation commit `90fce05d418e6f3f7a97031832c1d1cf4f16acfd`.
+- Stage 61: clarified `cc_library_static` compile/archive cannot establish successful final link, and a default module build may not select the recovery variant. Documentation commit `7edee9c5eb9f7dfb51a45ac6532beb8b8ee1d7ec`.
+- Stage 62: added `experiments/weaver-aidl/LinkProbe.cpp` with non-executed entry point that references `Connect()` and `GetConfig()`, commit `aeb735e54ec2b93093f76bce76b2b5815198b270`. Added `cc_binary` opt-in `rothko_weaver_aidl_link_probe` with `recovery_available: true`, `installable: false` and Weaver/Binder shared dependencies, commit `c65f3183e275aa358ec23214dc559b03605ef036`. Documented limitations in commit `a7ed3faec6961468c027754b094b75cbbfaca346`.
+- **Limitations:** link probe currently references `Connect` and `GetConfig`, not `Verify`; the latter read-path linker coverage is unproven. Including the adapter `.cpp` directly is temporary probe-only organization. No code is integrated with production `libvold`.
+- The 14-check source audit script has not been executed in a checked-out workspace. No TWRP build, link probe build, Actions, image inspection, recovery runtime test, flash, merge or squash has occurred. `ALLOW_MISSING_DEPENDENCIES := true` remains a concern: no false-green claims.
+- Repo `https://github.com/cogan17/TRWP-Rothko`, dev branch `fix/metadata-f2fs`, default `twrp-14.1_a16` untouched. Draft PR #2 **HOLD**, Issue #1 tracking.
+
+### Next task — stage 63
+Audit the link probe for real linker coverage of the `Verify()` read path without executing credential operations, and add minimal static checks. Avoid production integration, duplicate PRs or speculative HAL startup modifications. Confirm source changes before reporting success; do not build or trigger Actions without explicit authorization.
