@@ -52,10 +52,13 @@ jobs:
       - name: Build vendor_boot.img
         run: |
           cd twrp
-          export ALLOW_MISSING_DEPENDENCIES=true
-          source build/envsetup.sh
-          lunch twrp_rothko-eng
-          mka vendorbootimage
+          {
+            export ALLOW_MISSING_DEPENDENCIES=true
+            source build/envsetup.sh
+            # 14.1 lunch requires <product>-<release>-<variant>
+            lunch twrp_rothko-ap2a-eng || lunch twrp_rothko-trunk_staging-eng
+            mka vendorbootimage
+          } 2>&1 | tee build.log
           cd out/target/product/rothko
           sha256sum vendor_boot.img | tee vendor_boot.img.sha256
           echo "::notice title=vendor_boot.img::$(stat -c%s vendor_boot.img) bytes, sha256 $(cut -d' ' -f1 vendor_boot.img.sha256)"
@@ -65,6 +68,7 @@ jobs:
         if: failure()
         run: |
           f=twrp/out/error.log
+          [ -s "$f" ] || f=twrp/build.log
           [ -s "$f" ] || exit 0
           msg=$(tail -c 3500 "$f" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | sed ':a;N;$!ba;s/\n/%0A/g')
           echo "::error title=Build error::$msg"
