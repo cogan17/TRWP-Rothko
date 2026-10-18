@@ -56,3 +56,20 @@ Inspected exact upstream `TeamWin/android_hardware_interfaces` branch `android-1
 - Existing `ALLOW_MISSING_DEPENDENCIES := true` makes build success insufficient by itself; require evidence that the probe was actually compiled and linked.
 
 **Stage 60 next:** investigate source-level recovery variant strategies (upstream interface support vs correctly scoped build-only probe) without changing production vold or adding a fake-success fallback. Draft PR #2 HOLD; no build/Actions/flash/merge.
+
+
+## Stage 60 — recovery variant decision (source-only)
+
+Decision: **keep the prototype isolated and keep `recovery_available: true` on the opt-in probe**. Do not mask an unresolved recovery dependency by changing it to a system-only probe and claiming the recovery target is supported.
+
+Verified upstream `weaver/aidl/Android.bp` only declares `vendor_available: true` and frozen versions 1/2; it does **not** explicitly declare `recovery_available: true`. This is an unresolved compatibility gate, not proof of failure: the generated NDK module's actual variants must be inspected in the exact Soong tree. Upstream `WeaverReadResponse.aidl` confirms `long timeout`, `byte[] value`, and `WeaverReadStatus status`; the documented timeout range is nonnegative and less than INT_MAX. Our adapter conservatively refuses success for any nonzero timeout, including negative values.
+
+### Required evidence before production integration
+
+1. In an approved, matching TWRP source checkout, inspect generated Soong module variants for `android.hardware.weaver-V2-ndk` and `libbinder_ndk`, including recovery availability and transitive dependencies.
+2. Build **only the explicitly opted-in probe** when approved, inspect its compile command, and fail on any missing or stubbed dependency despite `ALLOW_MISSING_DEPENDENCIES := true`.
+3. If a recovery variant is absent, consider an isolated, reviewed upstream interface build change or a compatible recovery-specific build path; do not invent an NDK HAL binary or enable blanket missing dependencies as a workaround.
+4. Independently establish NXP Weaver service registration, executable/library presence and init lifecycle in the *built recovery ramdisk* before integrating with vold.
+5. Preserve the existing HIDL implementation until an AIDL replacement is compiled and runtime-validated. No Weaver slot writes, no credential retries, no log secrets.
+
+**Stage 61 next:** inspect whether the probe's current `cc_library_static` shared-library declarations are appropriate for an opt-in compile-only target, and document the precise compile/link evidence required. No Actions/build/flash/merge; Draft PR #2 HOLD.
