@@ -16,6 +16,7 @@ checks = {
     "null binder guard": "if (!binder.get()) return false;" in src,
     "slot range validation": "slot < 0 || slot >= config.slots" in src,
     "key length validation": "key.size() != static_cast<size_t>(config.keySize)" in src,
+    "AIDL signed byte conversion": "std::vector<int8_t> aidl_key(key.begin(), key.end())" in src and "service_->read(slot, aidl_key, &response)" in src,
     "throttle status handled": "WeaverReadStatus::THROTTLE" in src,
     "positive timeout hard stop": "if (result.timeout_ms > 0)" in src,
     "incorrect key handled": "WeaverReadStatus::INCORRECT_KEY" in src,
