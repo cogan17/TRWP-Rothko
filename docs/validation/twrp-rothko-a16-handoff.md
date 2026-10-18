@@ -24,7 +24,7 @@ Checkpoint: 2026-10-18, stage 32. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_
 - README asserts Android 16 decryption works; not verified for the changes in this branch.
 - No .github/workflows found in branch; no associated PR-triggered workflow runs or commit statuses. No real build completed.
 
-## Next task — stage 33
+## Previously planned task — stage 33 (audited)
 Audit how `recovery/root` is packaged into vendor_boot (ramdisk placement, .rc import, manifest fragments, service executable paths) and whether TWRP core starts security HALs. Cross-check module loading and FBE prerequisites. Make minimal source-only fix only if provably needed; otherwise record unresolved verification gates. Then arrange a real TWRP Android 16 build in an appropriate source tree, only with owner's authorization.
 
 ## Guardrails
@@ -32,3 +32,16 @@ Audit how `recovery/root` is packaged into vendor_boot (ramdisk placement, .rc i
 - No build, flash, merge or squash without explicit approval and successful validation. No forced-green CI.
 - UFS disk /dev/block/sdc mapped on actual device, but ioctl and partial-failure safety unverified; never perform live slot writes for diagnosis.
 - Preserve changes; avoid repeated checks and unnecessary workflow reruns.
+
+## Stage 33–37 follow-up (2026-10-18)
+- Stage 33: device tree alone does not prove `recovery/root` files are installed into the final vendor_boot; inspect built ramdisk.
+- Stage 34: upstream `TeamWin/android_bootable_recovery` and `TeamWin/android_build` have `android-14.1` branches; `minimal-manifest-twrp/platform_manifest_twrp_aosp` has `twrp-14.1`.
+- Stage 35: `twrp-14.1` manifest defaults to AOSP `android-14.0.0_r67`; README specifies `mka vendorbootimage` for vendor_boot recovery. Android 16 FBE compatibility remains unproven.
+- Stage 36: upstream `TeamWin/android_build` `android-14.1`, `core/Makefile` lines ~1593–1603, includes `TARGET_RECOVERY_ROOT_OUT` in vendor ramdisk when `BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT=true` and separate recovery fragment not enabled. Lines ~338–345 describe separate fragment when enabled. Build output still needed to verify prebuilt paths and init imports.
+- Stage 37: same upstream `core/Makefile` lines ~273–287 does not produce standalone recovery.img when resources move to vendor_boot. Branch has ~350 blobs under `recovery/root`, including 237 .ko. `BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE=67108864` (64 MiB); final compressed image size unknown.
+
+## Next task — stage 38
+Trace exact `recovery/root` file installation into `TARGET_RECOVERY_ROOT_OUT` in TeamWin/AOSP build rules; confirm whether a `TARGET_RECOVERY_DEVICE_DIR`/PRODUCT_COPY_FILES mapping is required, and inspect service .rc import/manifest placement. If available, estimate vendor_boot payload size from Git blob metadata without conflating raw and compressed sizes. No speculative code changes; real build and inspection only with owner approval.
+
+## State after this checkpoint
+Draft PR #2 and Issue #1 remain the single tracking artifacts; HOLD merge and squash until real build/runtime verification. No Actions, builds or flashing executed in stages 33–37. This document update is documentation-only.
