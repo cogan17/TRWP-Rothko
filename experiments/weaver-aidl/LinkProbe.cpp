@@ -3,16 +3,24 @@
 // Include the standalone prototype until it has a public header.
 #include "WeaverAidl.cpp"
 
+#if !__has_attribute(retain)
+#error "The link probe requires compiler support for the retain attribute."
+#endif
+
+namespace {
+using VerifyMethod = rothko::crypto::WeaverReadResult (
+    rothko::crypto::WeaverAidl::*)(int32_t, const std::vector<uint8_t>&);
+
+// 'used' requests compiler emission; 'retain' roots the ELF data section
+// against linker garbage collection. Its relocation references Verify without
+// invoking it. Confirm the emitted section/relocation and optimized link map
+// in an approved build; volatile alone is not an explicit linker-retention rule.
+__attribute__((used, retain))
+const VerifyMethod verify_reference = &rothko::crypto::WeaverAidl::Verify;
+}  // namespace
+
 int main() {
     rothko::crypto::WeaverAidl adapter;
-    // The Verify reference is intentionally unreachable at runtime. Keeping
-    // its address in a volatile function pointer makes its read path part of
-    // the link graph without attempting any Weaver credential operation.
-    using VerifyMethod = rothko::crypto::WeaverReadResult (
-        rothko::crypto::WeaverAidl::*)(int32_t, const std::vector<uint8_t>&);
-    VerifyMethod volatile verify_reference = &rothko::crypto::WeaverAidl::Verify;
-    (void)verify_reference;
-
     // This target must NOT be executed: recovery HAL availability is unknown.
     const bool connected = adapter.Connect();
     if (!connected) return 1;

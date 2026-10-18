@@ -1,9 +1,15 @@
 # TWRP Rothko Android 16 — development handoff
 
-Checkpoint: 2026-10-18, stage 38. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
+Checkpoint: 2026-10-18, stage 64. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
 
-Resumed from stage-37 commit `5df0af40b9c0978feb5da959b22196cb20f95f77`.
-Detailed latest audit: [stage 38 packaging, init, and size evidence](twrp-rothko-stage38-packaging.md).
+Resumed from stage-63 commit `e86b8290f015c732820c40e74975718900b68039`.
+**Current result:** explicit compiler/linker retention on the isolated Verify
+reference; local source audit **18/18 PASS**, plus three isolation-guard
+regression scenarios. Compilation, optimized-link retention, recovery variants,
+and FBE remain unverified. Draft PR #2 stays **HOLD**.
+**Resume:** the stage-65 task at the end of this file. Earlier sections are
+historical evidence; their old "next task" instructions are superseded.
+Packaging background: [stage 38 packaging, init, and size evidence](twrp-rothko-stage38-packaging.md).
 
 ## Tracking
 - Issue: https://github.com/cogan17/TRWP-Rothko/issues/1
@@ -137,3 +143,41 @@ Audit the link probe for real linker coverage of the `Verify()` read path withou
 
 ### Next task — stage 64
 Audit optimization and linker retention semantics of the opt-in link probe, including the volatile pointer-to-member reference. Make only minimal, provable source changes and update source checks as needed. Do not run or install the probe; do not trigger Actions or compilation without explicit owner authorization. Preserve the isolation and production safeguards.
+
+## Checkpoint update — stage 64 (2026-10-18)
+
+- Replaced the local volatile Verify pointer with a namespace-scope constant
+  pointer-to-member marked `__attribute__((used, retain))` in `LinkProbe.cpp`.
+  `used` requests compiler emission; `retain` requests ELF section retention
+  during linker garbage collection. A compiler lacking `retain` is rejected
+  explicitly. This is a stronger, documented retention contract; it is **not**
+  evidence that the previous volatile implementation actually failed.
+- No Verify invocation was added. Existing Connect/GetConfig calls are unchanged;
+  the probe remains non-installable and must not be run on a device.
+- Actually ran the previous 16-check Python audit in the checkout: **15 PASS,
+  1 FAIL**. The failure was a false positive: the Android.bp explanatory comment
+  mentions `PRODUCT_PACKAGES`. Replaced that predicate with a conservative scan
+  for the two probe module names in this device tree's `.mk` files after stripping
+  Make comments. This does not evaluate inherited products or replace Soong.
+- Added two retention predicates. Ran the revised audit: **18/18 PASS**.
+  Three temporary-fixture regressions also passed: a commented product example
+  is accepted; real product references to either probe produce the expected
+  isolation failure. `git diff --check` passed.
+- Retention rationale and primary compiler/linker references are in
+  `experiments/weaver-aidl/README.md`, stage 64. Exact Android compiler/linker
+  support and the emitted ELF relocation/link map remain unverified.
+- No C++ compilation, link-probe execution, Actions, TWRP image build, runtime
+  credential operation, flash, merge, squash, or production source change.
+  Default branch untouched; one Draft PR #2 **HOLD**, Issue #1 tracking.
+
+### Next task — stage 65
+
+Prepare one reproducible, narrowly scoped build-validation plan against pinned
+TeamWin source revisions: identify the recovery variants of Weaver NDK/Binder,
+the exact non-installable probe target and compiler/linker versions, and the
+unstripped ELF/relocation/link-map evidence needed for Verify retention. Resolve
+source-level planning gaps before requesting approval; do not keep revising the
+probe speculatively. A green archive or system variant is insufficient, especially
+with `ALLOW_MISSING_DEPENDENCIES := true`. Real compilation/Actions, device tests,
+and merge/flash remain separate gates; keep the current HOLD until authorized
+validation establishes them.

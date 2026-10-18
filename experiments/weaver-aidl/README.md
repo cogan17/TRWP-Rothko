@@ -2,6 +2,12 @@
 
 This directory is an isolated source prototype for Rothko Android 16. It is **not** part of the recovery build: an opt-in `Android.bp` compile-probe target (not selected by product), no changes to upstream `system/vold`, and no runtime testing.
 
+**Current checkpoint: stage 64.** Local source audit: **18/18 PASS**; three
+product-isolation regression scenarios passed. The Verify reference now has
+explicit compiler/linker retention attributes. These are source results only;
+C++ compilation, final optimized linking, recovery dependencies and FBE remain
+unverified. Earlier stage sections below record historical findings.
+
 Device evidence: Android registers `android.hardware.weaver.IWeaver/default` and the active user's synthetic-password directory contains both `.weaver` and `.secdis` files. Neither observation establishes which credential handle is active in recovery or guarantees a service will start in recovery.
 
 ## Validation gates before integration
@@ -105,3 +111,46 @@ The non-installable `LinkProbe.cpp` now takes the address of `WeaverAidl::Verify
 `audit_source.py` now has 16 simple source predicates (two added for non-installable link probe and non-invoked Verify reference). These are textual guards only, not a parser, build, or runtime test. No Actions, compilation, flashing, merge or PR status change.
 
 **Stage 64 next:** review Soong build-target semantics and whether the link probe's method-address retention survives optimized linking; adjust only if demonstrably necessary. Keep recovery variant availability unresolved until a separately approved build.
+
+## Stage 64 — explicit ELF retention and executed source audit
+
+Replaced the local volatile pointer-to-member with a namespace-scope constant
+`verify_reference` carrying `__attribute__((used, retain))`. It still takes the
+address of `WeaverAidl::Verify` without invoking it. According to the
+[Clang attribute documentation](https://clang.llvm.org/docs/AttributeReference.html#retain),
+`used` requests emission by the compiler, whereas `retain` prevents ELF section
+garbage collection by a supporting linker. The
+[LLD ELF documentation](https://lld.llvm.org/ELF/start-stop-gc.html)
+also distinguishes compiler retention from linker GC. This gives the probe an
+explicit retention rule rather than relying on a local volatile store. It does
+**not** prove the previous implementation failed or the current optimized binary
+has been inspected.
+
+The compiler must support the `retain` attribute (checked with `__has_attribute`);
+the linker must support `SHF_GNU_RETAIN` (LLD 13 or newer per Clang documentation).
+Do not remove the attribute or disable warnings to conceal an incompatible
+toolchain. This translation unit is compiled directly by the opt-in binary;
+the retention design does not rely on extraction from the separate static probe.
+
+The first actual execution of the previous Python audit returned 15/16 PASS:
+its `PRODUCT_PACKAGES` test incorrectly matched an Android.bp comment. The
+replacement inspects this device tree's `.mk` files for either probe module name
+after stripping Make comments. It is a conservative textual isolation guard,
+not product inheritance evaluation or proof of the final image contents.
+Two additional predicates check the retention declaration and explicit compiler
+support requirement. The revised audit returned **18/18 PASS**. Three temporary
+fixtures confirmed that a commented product example passes and actual product
+references to each probe fail the isolation check. `git diff --check` passed.
+
+For a future approved compile/link validation, inspect the actual recovery
+variant, compiler/linker versions and options, the emitted retained data section
+and its Verify relocation, and the optimized unstripped ELF/link map. Confirm
+that the Verify implementation and its read path remain reachable from the
+retained reference. Calls may be indirect or inlined, so absence/presence of a
+literal `IWeaver::read` symbol alone is not sufficient evidence. Keep actual
+Weaver/Binder dependency resolution independent of this retention check.
+
+No probe execution, C++ compilation, Actions or recovery integration occurred.
+`main()` still contains Connect/GetConfig calls and must not be run on a device.
+**Next: stage 65**, one pinned, reproducible recovery build-validation plan.
+Draft PR #2 remains HOLD.
