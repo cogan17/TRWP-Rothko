@@ -14,3 +14,14 @@ Device evidence: Android registers `android.hardware.weaver.IWeaver/default` and
 6. Require approved build, image inspection, and on-device recovery validation before merge/flash.
 
 PR #2 remains Draft/HOLD. Do not run Actions, build, merge or flash on this prototype alone.
+
+## Source audit — stage 53
+
+- Confirmed TeamWin `android_system_vold/Android.bp`: `libvold` compiles `Weaver1.cpp` and links `android.hardware.weaver@1.0`; it does **not** yet link `android.hardware.weaver-V2-ndk`.
+- Confirmed TeamWin `android_hardware_interfaces` branch `android-14.1` contains frozen Weaver AIDL v2. Generated NDK module name must still be validated by an actual Soong build.
+- The standalone adapter is not linked to any Android.bp target, so its C++ API compatibility is **unverified**. Do not claim compilation success.
+- Android runtime evidence of AIDL Weaver does not prove the NXP HAL binary and dependencies are present or startable in recovery.
+- Before integrating, verify Binder error mapping, AIDL v2 header types, read response validation, service lifecycle and credential throttling. No automatic retries.
+- Integration requires changing the selected TeamWin vold source/build graph or carrying a carefully isolated override; merely placing a .cpp file in the device tree does not activate it.
+
+Status: SOURCE PROTOTYPE ONLY. Draft PR #2 HOLD. No build, Actions, flashing or merge.
