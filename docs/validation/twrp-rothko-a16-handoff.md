@@ -2,6 +2,31 @@
 
 Checkpoint: 2026-10-18, stage 67. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
 
+## Owner checkpoint — paused (2026-10-18)
+
+Saved state: `5e941e020b29271761b23916a36b477f885fdbc7`, followed by this
+documentation-only checkpoint. Work is paused at the owner's request.
+Issue #1 and Draft PR #2 remain the tracking artifacts; PR #2 stays **HOLD**.
+The default branch remains at `b246a04f562a5307bfc9bf5f2117f87ae12f85b0`.
+
+- The full **658-project** input manifest is frozen and accepted by the official
+  Repo parser. It is not a post-checkout `repo manifest -r` export.
+- Source-level availability of Clang `r510928` is established; actual compiler
+  execution, C++ compilation, linking, and runtime behavior remain unverified.
+- Full checkout cannot fit this session: three required prebuilt projects alone
+  require **33.958 GiB**, exceeding the entire **31.451 GiB** volume before Git
+  data, remaining projects, or build output.
+- Runner selection is **pending**. The owner has not selected GitHub Actions or
+  an existing Linux server. This checkpoint adds no authorization for a build,
+  Actions run, flashing, or merge.
+- On resume, select/provision a sufficiently sized Linux runner, use the frozen
+  full manifest without stacking the older selective overlay, then obtain the
+  actual checkout manifest. Follow the stage 65 plan and its authorization gates
+  before compiling the single recovery link probe. Do not repeat completed
+  source audits.
+
+## Stage 67 result
+
 Resumed from stage-66 commit `f3a7f2e08d5e575d4baaa588e274271f1f976024`.
 **Current result:** [stage 65 build-validation plan](twrp-rothko-stage65-build-plan.md),
 the [full 658-project input manifest](../../experiments/weaver-aidl/validation-manifest.xml),
