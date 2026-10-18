@@ -62,8 +62,10 @@ public:
             return result;
         }
 
+        // AIDL byte[] maps to std::vector<int8_t>, not uint8_t.
+        const std::vector<int8_t> aidl_key(key.begin(), key.end());
         aw::WeaverReadResponse response;
-        const auto call = service_->read(slot, key, &response);
+        const auto call = service_->read(slot, aidl_key, &response);
         if (!call.isOk()) {
             // Some HAL implementations return status as a service-specific
             // binder exception rather than a populated response.
