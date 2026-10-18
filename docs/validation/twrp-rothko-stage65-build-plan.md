@@ -1,6 +1,10 @@
 # Rothko Weaver — rencana validasi build recovery (tahap 65)
 
 Status: **rencana dan patch source siap ditinjau; build belum dijalankan**.
+Update tahap 66: Clang yang dibutuhkan tersedia dalam source AOSP yang dipilih;
+identitas commit dan target symlink sudah diperiksa pada remote resmi. Bukti:
+[toolchain metadata](twrp-rothko-stage66-toolchain.json). Tidak perlu mengganti
+versi compiler. Workspace Android lengkap dan manifest hasil checkout belum ada.
 PR #2 tetap Draft/HOLD. Tidak ada perubahan pada vold produksi, integrasi HAL,
 workflow, atau cabang default. Rencana ini hanya menguji satu executable probe
 yang tidak dipasang dan tidak dijalankan pada perangkat.
@@ -25,26 +29,29 @@ FBE Android 16. Overlay selektif: [validation-pins.xml](../../experiments/weaver
 | `system/tools/aidl` | `de1052c28d821a7f9263b986e9200c4ca4971276` |
 | `frameworks/native` | `64792e223d982e7032ef17d797484b488bdb887c` |
 | `build/release` | `e4fc71a1aef3d297e11f710d4e31fc34f77bfd90` |
+| `prebuilts/clang/host/linux-x86` | `7154d3eddcb62ff7909a6ae2bf0c03e445e65bc4` |
 
 Overlay ini **bukan lock seluruh workspace**: proyek lain pada manifest masih
 mengikuti revision masing-masing. Setelah source disiapkan di checkout terpisah,
 ekspor `repo manifest -r -o resolved-manifest.xml`, simpan seluruh diff lokal dan
 hash patch, lalu gunakan snapshot itu untuk reproduksi. Jangan mengaku seluruh
-workspace sudah terkunci hanya berdasarkan sebelas pin di atas. Jika device tree
+workspace sudah terkunci hanya berdasarkan dua belas pin di atas. Jika device tree
 sudah tercantum dalam local manifest lain, ganti entri itu; jangan menggandakan
 project pada path yang sama.
 
-Tiga commit AOSP terakhir diperoleh dengan membuka annotated tag
+Pada tahap 65, commit AOSP untuk AIDL, Binder dan build/release diperoleh dari annotated tag
 `android-14.0.0_r67` pada mirror `aosp-mirror-neo`; tag menunjuk ke commit yang
 tercantum. Pembacaan langsung Gitiles untuk file terkait gagal pada sesi ini.
-Verifikasi identitas commit saat sync dari remote AOSP resmi; mirror tersebut
-tidak ditambahkan sebagai remote build. Pin TeamWin berasal dari repo TeamWin.
+Tahap 66 berhasil membaca remote AOSP resmi secara langsung dan mencocokkan
+ketiga commit tersebut, beserta commit prebuilt Clang. Mirror tidak ditambahkan
+sebagai remote build. Identitas checkout nyata tetap perlu dicocokkan saat sync.
+Pin TeamWin berasal dari repo TeamWin.
 
 ## Temuan source yang menentukan prosedur
 
 | Temuan | Konsekuensi |
 | --- | --- |
-| Soong `cc/config/global.go` memilih `clang-r510928`, short version `18` | Periksa direktori dan versi executable yang benar sebelum bootstrap. Keberadaan prebuilt itu dalam snapshot AOSP belum terverifikasi. |
+| Soong `cc/config/global.go` memilih `clang-r510928`, short version `18` | Tahap 66 membuktikan direktorinya ada dalam snapshot AOSP, dengan metadata versi `18.0.0` dan target symlink yang tersedia. Versi executable dan kompatibilitas host tetap perlu diperiksa sebelum bootstrap. |
 | `cc/cc.go` menambahkan suffix `.recovery` untuk modul dengan varian core dan recovery | Target yang diminta adalah `rothko_weaver_aidl_link_probe.recovery`, bukan nama tanpa suffix atau static archive. Konfirmasi lagi target hasil generate. |
 | Weaver `aidl_interface` tidak mengisi `Recovery_available`; generator AIDL meneruskan properti tersebut ke library native | Ada kekurangan deklarasi source untuk varian recovery Weaver. Siapkan override terisolasi; keberhasilan graph dan dependensi transitif belum dibuktikan. |
 | `libbinder_ndk` AOSP pada pin di atas menyatakan `recovery_available: true` | Dukungan deklaratif Binder tersedia; seluruh dependensi recovery tetap harus diperiksa di graph. |
@@ -73,7 +80,7 @@ persetujuan. Tidak ada workspace Android lengkap atau runner yang disiapkan
 oleh tahap ini. Perintah berikut merupakan prosedur, belum dieksekusi.
 
 1. Siapkan manifest pada commit di atas. Tambahkan overlay selektif sebagai
-   local manifest, sync source, cocokkan sebelas SHA, dan ekspor manifest penuh.
+   local manifest, sync source, cocokkan dua belas SHA, dan ekspor manifest penuh.
    Simpan versi `repo`, status/diff tiap project, dan hash kedua file validasi.
 2. Periksa prebuilt yang dipilih Soong:
 
@@ -153,3 +160,4 @@ yang tersirat dari rencana ini.
 - [Propagasi properti AIDL, salinan tagged source](https://github.com/aosp-mirror-neo/platform_system_tools_aidl/blob/de1052c28d821a7f9263b986e9200c4ca4971276/build/aidl_interface_backends.go#L147-L180).
 - [Binder NDK, salinan tagged source](https://github.com/aosp-mirror-neo/platform_frameworks_native/blob/64792e223d982e7032ef17d797484b488bdb887c/libs/binder/ndk/Android.bp#L35-L39).
 - [Release ap2a, salinan tagged source](https://github.com/aosp-mirror-neo/platform_build_release/blob/e4fc71a1aef3d297e11f710d4e31fc34f77bfd90/release_config_map.mk#L23).
+- [Prebuilt Clang pada commit AOSP yang sudah diverifikasi](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+/7154d3eddcb62ff7909a6ae2bf0c03e445e65bc4/clang-r510928/).

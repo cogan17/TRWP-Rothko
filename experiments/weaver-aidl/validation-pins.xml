@@ -12,6 +12,7 @@
   <extend-project name="platform/system/tools/aidl" path="system/tools/aidl" revision="de1052c28d821a7f9263b986e9200c4ca4971276" upstream="refs/tags/android-14.0.0_r67" />
   <extend-project name="platform/frameworks/native" path="frameworks/native" revision="64792e223d982e7032ef17d797484b488bdb887c" upstream="refs/tags/android-14.0.0_r67" />
   <extend-project name="platform/build/release" path="build/release" revision="e4fc71a1aef3d297e11f710d4e31fc34f77bfd90" upstream="refs/tags/android-14.0.0_r67" />
+  <extend-project name="platform/prebuilts/clang/host/linux-x86" path="prebuilts/clang/host/linux-x86" revision="7154d3eddcb62ff7909a6ae2bf0c03e445e65bc4" upstream="refs/tags/android-14.0.0_r67" />
   <remote name="rothko-validation" fetch="https://github.com" />
   <project name="cogan17/TRWP-Rothko" path="device/xiaomi/rothko" remote="rothko-validation" revision="c471f27f7811c0e96bca5a824f7281dd1a4fdabe" upstream="fix/metadata-f2fs" />
 </manifest>

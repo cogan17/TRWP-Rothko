@@ -1,15 +1,19 @@
 # TWRP Rothko Android 16 — development handoff
 
-Checkpoint: 2026-10-18, stage 65. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
+Checkpoint: 2026-10-18, stage 66. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
 
-Resumed from stage-64 commit `c471f27f7811c0e96bca5a824f7281dd1a4fdabe`.
+Resumed from stage-65 commit `b116527f388f64d3af4bd07e9229c6e0451a18a6`.
 **Current result:** [stage 65 build-validation plan](twrp-rothko-stage65-build-plan.md),
-eleven selective source pins, and a validation-only workspace patch. XML structure
-and patch applicability checked locally. Stage 64's **18/18** source checks and
+now twelve selective source pins, and a validation-only workspace patch. Clang
+`r510928` / declared version `18.0.0` is present in the official AOSP snapshot;
+the source-level availability question is closed. See
+[stage 66 toolchain evidence](twrp-rothko-stage66-toolchain.json).
+Stage 64's **18/18** source checks and
 three regression scenarios remain the last adapter audit; they were not repeated.
-Compiler prebuilt availability, compilation, optimized-link retention, recovery
-dependency resolution, and FBE remain unverified. Draft PR #2 stays **HOLD**.
-**Resume:** the stage-66 task at the end of this file. Earlier sections are
+Actual host execution, a complete Android workspace, compilation, optimized-link
+retention, recovery dependency resolution, and FBE remain unverified.
+Draft PR #2 stays **HOLD**.
+**Resume:** workspace/build preparation at the end of this file. Earlier sections are
 historical evidence; their old "next task" instructions are superseded.
 Packaging background: [stage 38 packaging, init, and size evidence](twrp-rothko-stage38-packaging.md).
 
@@ -223,3 +227,46 @@ correction rather than silently swapping compiler versions. Do not repeat the
 Verify audit or add speculative probe code. The reviewed stage-65 procedure is
 the concrete scope for the separately authorized single recovery probe build;
 no image build, runtime test, merge or flash is included in that scope.
+
+## Checkpoint update — stage 66 (2026-10-18)
+
+- **Closed the Clang source-availability gate.** Direct requests to the official
+  AOSP Gitiles JSON/TEXT endpoints succeeded, despite the web reader failures.
+  Tag `android-14.0.0_r67` resolves to prebuilt commit
+  `7154d3eddcb62ff7909a6ae2bf0c03e445e65bc4`; its tree contains `clang-r510928`.
+  `AndroidVersion.txt` declares `18.0.0`, matching the pinned Soong default.
+  No compiler replacement, environment override, or version symlink is needed.
+- Added this exact commit to `validation-pins.xml` using the existing AOSP
+  project/remote. There are now **12** selective pins; the overlay is still not
+  a complete resolved workspace manifest.
+- Verified source-tree entries and link targets: `clang.real -> clang-18`,
+  `clang++.real -> clang.real`, `ld.lld -> lld`, and
+  `llvm-readelf -> llvm-readobj`. Target entries exist in the same pinned tree.
+  These are Git tree/blob identities, not runtime binary SHA-256 measurements.
+- Official AOSP tag reads also confirmed the stage-65 commits for AIDL
+  (`de1052c...`), Binder/native (`64792e2...`), and build/release (`e4fc71a...`).
+  Mirror-only identity uncertainty for those three commits is closed.
+- Added machine-readable evidence in
+  `docs/validation/twrp-rothko-stage66-toolchain.json`; updated the existing plan
+  and README instead of creating another speculative probe revision.
+- **Workspace preflight remains blocked.** No full Android checkout or resolved
+  checkout manifest was found in the workspace. `repo`, `ninja`, and `javac`
+  are not on PATH. The current filesystem is 32 GiB with approximately 28 GiB
+  available; capacity for the full source plus build outputs is unverified.
+  No full source sync, environment provisioning, or `repo manifest -r` occurred.
+- No binaries were downloaded/executed; no bootstrap, lunch, C++ compilation,
+  link, Actions, image build, credential operation, flash, merge or new PR.
+  The stage-65 workspace patch remains unapplied. PR #2 is still Draft/HOLD;
+  the default branch remains untouched.
+
+### Next action — workspace and build preparation (HOLD)
+
+The remaining prerequisite is an actual, adequately provisioned disposable
+Android build workspace, not another Verify or Clang source audit. Establish
+the runner, sync the selected inputs, apply the existing validation-only patch,
+and export the complete resolved manifest plus diffs. Record actual Clang/LLD
+versions and host compatibility. The sole proposed compile target remains
+`rothko_weaver_aidl_link_probe.recovery` under the stage-65 procedure; compilation
+still needs the existing separate owner authorization. Do not invent a successful
+workspace export or move to image generation, production integration, merge or
+flash while those gates remain open.
