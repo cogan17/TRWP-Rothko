@@ -59,3 +59,37 @@ Trace actual KeyMint, Gatekeeper, and tee-supplicant startup/readiness in the ma
 
 ## State after this checkpoint
 Draft PR #2 and Issue #1 remain the single tracking artifacts; HOLD merge and squash until real build/runtime verification. No Actions, builds or flashing executed in stages 33–38. Stage 38 changes only this handoff and its supporting audit document.
+
+
+## Checkpoint update — stage 39–56 (2026-10-18)
+
+**This section supersedes the older "Next task — stage 39" above.** Resume from stage 57. Do not repeat successful source discovery or rooted-device checks.
+
+### Security/FBE investigation (stages 39–47)
+- Manifest-selected upstream: TeamWin `android_system_vold`, `android_bootable_recovery`, `android_system_core` at `android-14.1`; TeamWin `android_hardware_interfaces` at `android-14.1`.
+- TWRP vold `Decrypt.cpp` detects `.weaver` synthetic-password records and calls HIDL `android.hardware.weaver@1.0` via `Weaver1.cpp`; its Gatekeeper paths also use HIDL 1.0. Keystore2 code waits for its AIDL service. Android 16 compatibility is NOT established.
+- Actual rooted Rothko Android registers **AIDL** Weaver `android.hardware.weaver.IWeaver/default`, Gatekeeper `android.hardware.gatekeeper.IGatekeeper/default`, KeyMint `android.hardware.security.keymint.IKeyMintDevice/default`, and Keystore2. Vendor manifest names Weaver NXP and Gatekeeper/KeyMint MiTEE services; relevant Android processes were running.
+- User's read-only Termux screenshot shows both `*.weaver` and `*.secdis` under user 0's `spblob`; active credential handle/path remains unknown. Do not request or publish secret handles, PINs or credential data.
+- Weaver NXP HAL and dependencies have **not** been proven present/startable in recovery. Do not invent `.rc` start triggers or assume Android service availability transfers to recovery.
+
+### Weaver AIDL source prototype (stages 48–56)
+- TeamWin `android_hardware_interfaces` branch `android-14.1` contains frozen Weaver AIDL v2, with `IWeaver.getConfig/read/write` and `WeaverReadResponse.status/timeout/value`.
+- Existing TeamWin `android_system_vold/Android.bp` compiles `Weaver1.cpp` and links HIDL `android.hardware.weaver@1.0`, **not** Weaver AIDL. No vold integration has been committed.
+- Added isolated `experiments/weaver-aidl/WeaverAidl.cpp` (read-only Binder adapter; service lookup, config/key/slot checks, response/error mapping, throttle handling); **not** compiled, installed, linked, or runtime tested.
+- Added opt-in `experiments/weaver-aidl/Android.bp` static probe target `rothko_weaver_aidl_probe`, depends on `android.hardware.weaver-V2-ndk` and `libbinder_ndk`; not in `PRODUCT_PACKAGES`. Actual Soong resolution/C++ compile still unverified.
+- Added `experiments/weaver-aidl/audit_source.py`, initially 12 source guardrails; stage 56 added positive-timeout hard-stop guardrail (13 total). Prior assistant evaluated the original 12 source predicates as 12/12 true from fetched text, **not** a Python script execution; the 13-check revision has not been run.
+- Added `experiments/weaver-aidl/README.md` with HOLD gates. `BoardConfig.mk` sets `ALLOW_MISSING_DEPENDENCIES := true`: beware false confidence from a superficially green build.
+- Source changes/commits, chronological: `714a7ece` adapter; `ef72db8d` README; `bbf4dfc9` null Binder guard; `4db058c6` reconnect reset/timeout clamp; `f32e7913` audit doc; `47d386a0` opt-in Android.bp; `83d8181e` README; `19a42124` audit script; `b8d01b63` README; `e72b3cd0` positive-timeout throttle; `cca142c9` audit guardrail. All on `fix/metadata-f2fs`, no production/default branch modifications.
+- **Important limitation:** source-level checks and isolated commits do not establish that AIDL-generated C++ headers/constants are correct, that the NXP HAL runs in recovery, or that FBE decrypts. Do not claim build/test success.
+
+### Next task — stage 57
+1. Audit source-only C++ API and Binder error handling in `experiments/weaver-aidl/WeaverAidl.cpp`, especially AIDL service-specific error mapping, timeout and value-size validation. Fix only provable defects.
+2. Run the 13-check local source audit if a local checkout is available, clearly distinguish this from compiling.
+3. Determine minimal safe integration path into manifest-selected TeamWin vold, including licensing and build ownership; preserve HIDL and never write Weaver slots.
+4. Before any real build, explicitly verify Soong dependency resolution despite `ALLOW_MISSING_DEPENDENCIES`. A build, Actions, flashing, PR merge or squash require owner authorization.
+
+### State and guardrails
+- Repo: `https://github.com/cogan17/TRWP-Rothko`; dev branch `fix/metadata-f2fs`; default `twrp-14.1_a16` untouched.
+- Draft PR #2 `https://github.com/cogan17/TRWP-Rothko/pull/2` **HOLD**, Issue #1 remains tracking.
+- No Actions, TWRP image build, flashing, merge or runtime validation performed in stages 39–56.
+- One checkpoint, no duplicate PRs or needless workflow reruns. Continue with user command **"Lanjutkan"**.
