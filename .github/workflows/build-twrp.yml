@@ -35,13 +35,14 @@ jobs:
           if [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
           else src=/twrp; out=/mnt/out; swap=/mnt/swapfile; fi
           sudo mkdir -p "$src" "$out" && sudo chown "$USER" "$src" "$out"
-          sudo fallocate -l 8G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
+          sudo fallocate -l 16G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
           echo "SRC=$src" >> "$GITHUB_ENV"
           echo "OUT_DIR=$out" >> "$GITHUB_ENV"
           # sync and build join this cgroup, so the runner agent always keeps RAM
           # and an OOM kills only our processes
           sudo mkdir /sys/fs/cgroup/build
-          echo 12G | sudo tee /sys/fs/cgroup/build/memory.max
+          # soong_build was OOM-killed at 12G; leave the runner just 1 GiB
+          echo $(( ($(awk '/MemTotal/{print $2}' /proc/meminfo) - 1048576) * 1024 )) | sudo tee /sys/fs/cgroup/build/memory.max
           free -h
 
       - name: Install build tools
@@ -63,6 +64,8 @@ jobs:
           cd "$SRC"
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14.1
           repo sync -c -j"$(nproc --all)" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
+          # reference ABI dumps only feed optional ABI checks (skipped when missing); frees ~5.6G for swap
+          rm -rf prebuilts/abi-dumps
           echo "::notice title=Disk after sync::$(df -h --output=avail / | tail -1) free; biggest: $(du -sh .repo prebuilts/* external/* 2>/dev/null | sort -h | tail -6 | tr '\t\n' ' ;')"
 
       - uses: actions/checkout@v4
