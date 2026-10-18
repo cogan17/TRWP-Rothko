@@ -17,6 +17,6 @@
 PRODUCT_MAKEFILES := $(LOCAL_DIR)/twrp_rothko.mk
 
 COMMON_LUNCH_CHOICES := \
-    twrp_rothko-user \
-    twrp_rothko-userdebug \
-    twrp_rothko-eng
+    twrp_rothko-ap2a-user \
+    twrp_rothko-ap2a-userdebug \
+    twrp_rothko-ap2a-eng
