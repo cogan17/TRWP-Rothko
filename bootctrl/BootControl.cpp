@@ -87,12 +87,20 @@ Return<void> BootControl::markBootSuccessful(markBootSuccessful_cb _hidl_cb) {
 
 Return<void> BootControl::setActiveBootSlot(uint32_t slot, setActiveBootSlot_cb _hidl_cb) {
     struct CommandResult cr;
-    if (impl_.SetActiveBootSlot(slot) && implext_.SetBootRegionSlot(slot)) {
+    if (!impl_.IsValidSlot(slot)) {
+        cr.success = false;
+        cr.errMsg = "Invalid boot slot";
+    } else if (!impl_.SetActiveBootSlot(slot)) {
+        cr.success = false;
+        cr.errMsg = "Failed to update boot slot metadata";
+    } else if (!implext_.SetBootRegionSlot(slot)) {
+        LOG(ERROR) << "UFS boot region update failed after slot metadata was changed; "
+                      "boot state may be inconsistent";
+        cr.success = false;
+        cr.errMsg = "UFS boot region update failed; slot metadata may have changed";
+    } else {
         cr.success = true;
         cr.errMsg = "Success";
-    } else {
-        cr.success = false;
-        cr.errMsg = "Operation failed";
     }
     _hidl_cb(cr);
     return Void();
@@ -146,9 +154,6 @@ Return<MergeStatus> BootControl::getSnapshotMergeStatus() {
 
 // Methods from ::android::hardware::boot::V1_2::IBootControl follow.
 Return<uint32_t> BootControl::getActiveBootSlot() {
-    if (!impl_.GetActiveBootSlot()) {
-        return 0;
-    }
     return impl_.GetActiveBootSlot();
 }
 

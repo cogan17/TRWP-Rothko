@@ -51,13 +51,13 @@ namespace bootable {
 #if !defined(ARCH_X86)
 static bool ufs_set_active_boot_part(int boot)
 {
-    struct ufs_ioctl_query_data idata;
+    struct ufs_ioctl_query_data idata = {};
     unsigned char buf[1];
     int fd, ret = true;
 
     fd = open("/dev/block/sdc", O_RDWR);
     if (fd < 0) {
-        printf("%s: open device failed, err: %d\n", __func__, fd);
+        LOG(ERROR) << "Cannot open UFS device /dev/block/sdc: " << strerror(errno);
         return false;
     }
 
@@ -70,7 +70,7 @@ static bool ufs_set_active_boot_part(int boot)
     idata.buf_byte = 1;
 
     if (ioctl(fd, UFS_IOCTL_QUERY, &idata) < 0) {
-      LOG(ERROR) << "ufs_set boot_part fail";
+      LOG(ERROR) << "UFS boot LUN ioctl failed: " << strerror(errno);
       ret = false;
     }
     close(fd);
