@@ -36,30 +36,30 @@ on post-fs-data
     chown system system /sys/bus/i2c/drivers/awinic_haptic/0-005a/f0_save
     chown system system /sys/bus/i2c/drivers/awinic_haptic/0-005a/osc_save
     chown system system /sys/bus/i2c/drivers/awinic_haptic/0-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/0-005a/custom_wave
+    chmod 0666 /sys/bus/i2c/drivers/awinic_haptic/0-005a/custom_wave
     chown system system /sys/bus/i2c/drivers/sih_haptic_688X/0-006b/f0_save
     chown system system /sys/bus/i2c/drivers/sih_haptic_688X/0-006b/osc_save
     chown system system /sys/bus/i2c/drivers/sih_haptic_688X/0-006b/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/sih_haptic_688X/0-006b/custom_wave
+    chmod 0666 /sys/bus/i2c/drivers/sih_haptic_688X/0-006b/custom_wave
     chown system system /sys/bus/i2c/drivers/awinic_haptic/0-005a/f0
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/0-005a/f0
+    chmod 0666 /sys/bus/i2c/drivers/awinic_haptic/0-005a/f0
     chown system system /sys/bus/i2c/drivers/awinic_haptic/1-005a/f0_save
     chown system system /sys/bus/i2c/drivers/awinic_haptic/1-005a/osc_save
     chown system system /sys/bus/i2c/drivers/awinic_haptic/1-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/1-005a/custom_wave
+    chmod 0666 /sys/bus/i2c/drivers/awinic_haptic/1-005a/custom_wave
     chown system system /sys/bus/i2c/drivers/sih_haptic_688X/1-006b/f0_save
     chown system system /sys/bus/i2c/drivers/sih_haptic_688X/1-006b/osc_save
     chown system system /sys/bus/i2c/drivers/sih_haptic_688X/1-006b/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/sih_haptic_688X/1-006b/custom_wave
+    chmod 0666 /sys/bus/i2c/drivers/sih_haptic_688X/1-006b/custom_wave
     chown system system /sys/bus/i2c/drivers/awinic_haptic/1-005a/f0
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/1-005a/f0
- 
+    chmod 0666 /sys/bus/i2c/drivers/awinic_haptic/1-005a/f0
+
 on boot
     start mtk.plpath.utils.link
     setprop sys.usb.config adb
 
 on property:twrp.modules.loaded=true
     start vendor-watchdog
-    
+
 on property:sys.vendor.watchdog=ready
     start vibratorfeature-hal-service

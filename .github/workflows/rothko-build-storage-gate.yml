@@ -1,0 +1,40 @@
+name: Rothko Build Storage Gate
+on:
+  workflow_dispatch:
+    inputs:
+      required_free_gib:
+        description: 'Minimum free GiB for full Android checkout (owner-approved estimate; no sync)'
+        required: true
+        default: '250'
+        type: string
+permissions:
+  contents: read
+jobs:
+  storage-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check available storage and memory only
+        shell: bash
+        env:
+          REQUIRED_FREE_GIB: ${{ inputs.required_free_gib }}
+        run: |
+          set -euo pipefail
+          df -h /
+          free -h
+          python3 - <<'PY'
+          import os, shutil, sys
+          gib=1024**3
+          try:
+              threshold=int(os.environ['REQUIRED_FREE_GIB'])
+          except ValueError:
+              sys.exit('Invalid integer threshold')
+          if not 100 <= threshold <= 2000:
+              sys.exit('Threshold must be 100..2000 GiB')
+          total,used,free=shutil.disk_usage('/')
+          print(f'Total={total/gib:.2f} GiB, Free={free/gib:.2f} GiB, required={threshold} GiB')
+          if free < threshold*gib:
+              print('HOLD: storage gate failed. No repo sync, no build.')
+              sys.exit(1)
+          print('Storage threshold passed. HOLD: no repo sync or build is authorized by this check.')
+          PY

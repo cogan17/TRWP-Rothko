@@ -1,6 +1,6 @@
 service mitee-helper /system/bin/mitee_helper
-	class none
-	user root
-	group root
-	oneshot
-	seclabel u:r:recovery:s0
+    class none
+    user root
+    group root
+    oneshot
+    seclabel u:r:recovery:s0
