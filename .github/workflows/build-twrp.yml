@@ -17,8 +17,9 @@ jobs:
       # Source + out/ need ~80 GB; merge the runner's free root and /mnt space into the workspace
       - uses: easimon/maximize-build-space@v10
         with:
-          root-reserve-mb: 8192
-          swap-size-mb: 16384
+          # 8 GB for tools + 16 GB for a real swapfile (see Build step)
+          root-reserve-mb: 24576
+          swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -52,11 +53,17 @@ jobs:
 
       - name: Build vendor_boot.img
         run: |
-          # On OOM the kernel must kill the build, not the runner agent (that loses the whole log)
-          for p in $(pgrep -f 'Runner\.(Listener|Worker)|hosted-compute-agent'); do
-            echo -1000 | sudo tee /proc/$p/oom_score_adj >/dev/null || true
-          done
-          echo 1000 > /proc/self/oom_score_adj
+          # Swap on the action's loop-backed LVM can hang the VM under memory pressure
+          # (runner "lost communication" twice at ~46 min); use a plain swapfile instead
+          sudo swapoff -a
+          sudo fallocate -l 16G /swapfile && sudo chmod 600 /swapfile
+          sudo mkswap /swapfile && sudo swapon /swapfile
+          # Cap the build at 12G RAM so the runner agent always keeps memory;
+          # an OOM then kills only the build and the error stays readable
+          sudo mkdir /sys/fs/cgroup/build
+          echo 12G | sudo tee /sys/fs/cgroup/build/memory.max
+          echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs
+          free -h
           cd twrp
           {
             export ALLOW_MISSING_DEPENDENCIES=true
