@@ -13,13 +13,20 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
+    defaults:
+      run:
+        # explicit bash adds pipefail; without it a failed `mka | tee` passed as success
+        shell: bash
     steps:
       # No loop-backed LVM (maximize-build-space): heavy I/O + memory pressure on it hung the VM
       # three times ("runner lost communication"). Use the real / and /mnt disks instead.
       - name: Prepare disks, swap and memory cap
         run: |
           sudo swapoff -a && sudo rm -f /mnt/swapfile
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          # source alone is ~77 GB, so drop every preinstalled toolchain the build does not use
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/local/share/boost /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules \
+            /usr/share/swift /opt/microsoft /opt/google /opt/az /usr/local/julia*
           sudo docker image prune -a -f >/dev/null || true
           r=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
           m=$(df -BG --output=avail /mnt | tail -1 | tr -dc 0-9)
@@ -28,7 +35,7 @@ jobs:
           if [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
           else src=/twrp; out=/mnt/out; swap=/mnt/swapfile; fi
           sudo mkdir -p "$src" "$out" && sudo chown "$USER" "$src" "$out"
-          sudo fallocate -l 16G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
+          sudo fallocate -l 8G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
           echo "SRC=$src" >> "$GITHUB_ENV"
           echo "OUT_DIR=$out" >> "$GITHUB_ENV"
           # sync and build join this cgroup, so the runner agent always keeps RAM
@@ -56,7 +63,7 @@ jobs:
           cd "$SRC"
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14.1
           repo sync -c -j"$(nproc --all)" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
-          echo "::notice title=Disk after sync::$(df -h --output=target,avail / /mnt | tail -n +2 | tr -s ' ' | tr '\n' ' ')"
+          echo "::notice title=Disk after sync::$(df -h --output=avail / | tail -1) free; biggest: $(du -sh .repo prebuilts/* external/* 2>/dev/null | sort -h | tail -6 | tr '\t\n' ' ;')"
 
       - uses: actions/checkout@v4
         with:
