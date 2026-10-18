@@ -29,3 +29,7 @@ Status: SOURCE PROTOTYPE ONLY. Draft PR #2 HOLD. No build, Actions, flashing or 
 ## Stage 54 compile probe
 
 The isolated `Android.bp` target depends on `android.hardware.weaver-V2-ndk` and `libbinder_ndk`. Its module is **not** installed into recovery or referenced by product packages. It will only be useful when the experimental directory is available to Soong in the build workspace; the current device repository alone does not establish that. In a correctly configured build environment, invoke `m rothko_weaver_aidl_probe` only after owner approval. This is not a substitute for recovery runtime HAL verification.
+
+## Stage 55 — source guardrails
+
+Run `python3 experiments/weaver-aidl/audit_source.py` from the repository checkout for a read-only source contract check. This script is intentionally **not** a compiler, Soong dependency resolver, unit test, or runtime proof. **Important:** `BoardConfig.mk` sets `ALLOW_MISSING_DEPENDENCIES := true`; do not interpret a green overall build as proof that Weaver AIDL was compiled and linked. Verify the probe's compile and link actions and ensure missing dependencies are not silently accepted. No Actions or flashing authorized.
