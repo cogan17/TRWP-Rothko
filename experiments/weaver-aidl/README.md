@@ -43,3 +43,16 @@ Run `python3 experiments/weaver-aidl/audit_source.py` from the repository checko
 - Do not mistake string-based source checks for behavioral unit tests. The current 14-check audit script has not been executed in a checked-out tree; generated AIDL header compatibility and service startup in recovery remain unverified.
 
 **Stage 59 next:** check whether the selected Weaver AIDL interface and generated NDK library can produce a recovery-compatible variant, and review exact `Android.bp` dependency linkage. Preserve isolation and Draft PR #2 HOLD; no Actions/build/flash/merge without approval.
+
+
+## Stage 59 — recovery Soong variant audit (source-only)
+
+Inspected exact upstream `TeamWin/android_hardware_interfaces` branch `android-14.1`, `weaver/aidl/Android.bp` and `IWeaver.aidl`:
+
+- `aidl_interface { name: "android.hardware.weaver", vendor_available: true, versions_with_info: ["1", "2"], frozen: true }`. The NDK backend is not explicitly disabled, but actual generated module `android.hardware.weaver-V2-ndk` and its availability in the selected Soong graph are **not yet verified**.
+- Crucially, upstream Weaver `aidl_interface` does **not** explicitly set `recovery_available: true`. `vendor_available: true` does **not** prove that the generated NDK library has a recovery variant. The probe currently requests `recovery_available: true`; this is a **potential variant/dependency mismatch**, not a proven compile failure.
+- Do **not** silently remove the probe's recovery variant or force dependency allowances to green: the eventual adapter must actually work in recovery. Check the generated dependency variants and their transitive dependencies in a real, authorized Soong compile before changing integration.
+- `IWeaver.aidl` defines `STATUS_FAILED=1`, `STATUS_INCORRECT_KEY=2`, `STATUS_THROTTLE=3`, with `read(in int slotId, in byte[] key)`. The adapter's named exception cases align with source; generated C++ header symbols remain uncompiled.
+- Existing `ALLOW_MISSING_DEPENDENCIES := true` makes build success insufficient by itself; require evidence that the probe was actually compiled and linked.
+
+**Stage 60 next:** investigate source-level recovery variant strategies (upstream interface support vs correctly scoped build-only probe) without changing production vold or adding a fake-success fallback. Draft PR #2 HOLD; no build/Actions/flash/merge.
