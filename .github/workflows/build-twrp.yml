@@ -83,6 +83,7 @@ jobs:
           mkdir -p "$SRC/device/xiaomi"
           cp -a device-tree "$SRC/device/xiaomi/rothko"
           cd "$SRC"
+          for p in device/xiaomi/rothko/patches/bootable_recovery/*.patch; do git -C bootable/recovery apply "$SRC/$p"; done
           {
             export ALLOW_MISSING_DEPENDENCIES=true
             source build/envsetup.sh
