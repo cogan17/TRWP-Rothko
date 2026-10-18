@@ -3,7 +3,7 @@
 # specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
 
 #<mnt_point>        <type>    <device>                            <device2>                         <mnt_flags and options>
-/metadata                ext4              /dev/block/by-name/metadata                          flags=display="Metadata [ metadata ]";backup=1
+/metadata                f2fs              /dev/block/by-name/metadata                          flags=display="Metadata [ metadata ]";backup=1
 /data                        f2fs                /dev/block/by-name/userdata                          flags=display="Userdata [ data ]";fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption
 /cache                     ext4                /dev/block/by-name/rescue                             flags=display="Cache [ rescue ]";wipeingui;wipeduringfactoryreset
 
@@ -20,7 +20,7 @@
 
 # Boot
 /boot                                 emmc                      /dev/block/by-name/boot                              flags=display="Kernel Boot Image [ boot ] ";slotselect;backup=1;flashimg=1
-/init_boot                     emmc                      /dev/block/by-name/init_boot                  flags=display="Init Boot Image [ vendor_boot ]";slotselect;backup=1;flashimg=1
+/init_boot                     emmc                      /dev/block/by-name/init_boot                  flags=display="Init Boot Image [ init_boot ]";slotselect;backup=1;flashimg=1
 /vendor_boot                     emmc                      /dev/block/by-name/vendor_boot                  flags=display="Vendor Boot Image [ vendor_boot ]";slotselect;backup=1;flashimg=1
 /dtbo                                 emmc                      /dev/block/by-name/dtbo                              flags=display="Device Tree Blob Overlay [ dtbo ]";slotselect;backup=1;flashimg=1
 /vbmeta                            emmc                      /dev/block/by-name/vbmeta                          flags=display="Verified Boot Metadata [ vbmeta ]";slotselect;backup=1;flashimg=1
