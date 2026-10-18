@@ -73,3 +73,19 @@ Verified upstream `weaver/aidl/Android.bp` only declares `vendor_available: true
 5. Preserve the existing HIDL implementation until an AIDL replacement is compiled and runtime-validated. No Weaver slot writes, no credential retries, no log secrets.
 
 **Stage 61 next:** inspect whether the probe's current `cc_library_static` shared-library declarations are appropriate for an opt-in compile-only target, and document the precise compile/link evidence required. No Actions/build/flash/merge; Draft PR #2 HOLD.
+
+
+## Stage 61 — static archive vs link validation
+
+**Finding:** `rothko_weaver_aidl_probe` is a `cc_library_static`, not an executable or shared library. Building this module can compile `WeaverAidl.cpp` into an object and archive it, but **cannot by itself demonstrate a successful final link** against `android.hardware.weaver-V2-ndk` and `libbinder_ndk`. Its `shared_libs` declarations express dependencies but do not make the static archive a linked executable. Previous documentation calling this a compile-and-link proof was too strong.
+
+The `recovery_available: true` property requests a recovery variant, but a plain `m rothko_weaver_aidl_probe` is **not proof that the recovery variant** was selected or built. The module is not installed and is not part of the TWRP image.
+
+Before a production integration, with owner approval and a matching Soong checkout:
+1. Confirm the generated NDK interface library and Binder dependencies resolve to actual recovery variants (including transitive dependencies).
+2. Inspect the build graph and command output to establish that the **recovery variant** of the probe was compiled; do not rely on a default/system archive.
+3. Add a separate opt-in recovery **link target** only after dependency availability is established; ensure it links real Weaver/Binder libraries and references the adapter so that dead-code elimination cannot conceal missing symbols. This is a distinct gate from the current static compile probe.
+4. Keep `ALLOW_MISSING_DEPENDENCIES := true` from masking unresolved dependencies; inspect missing-dependency diagnostics, compiler invocation and final link command.
+5. Even a linked target cannot prove that NXP Weaver starts in recovery or that FBE decrypts.
+
+**Stage 62 next:** design an isolated, no-install link probe or audit upstream recovery variant support before introducing it. Do not modify production vold or claim runtime readiness. Draft PR #2 HOLD; no Actions/build/flash/merge.
