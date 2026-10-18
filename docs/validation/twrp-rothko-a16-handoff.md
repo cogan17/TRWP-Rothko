@@ -1,19 +1,23 @@
 # TWRP Rothko Android 16 — development handoff
 
-Checkpoint: 2026-10-18, stage 66. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
+Checkpoint: 2026-10-18, stage 67. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
 
-Resumed from stage-65 commit `b116527f388f64d3af4bd07e9229c6e0451a18a6`.
+Resumed from stage-66 commit `f3a7f2e08d5e575d4baaa588e274271f1f976024`.
 **Current result:** [stage 65 build-validation plan](twrp-rothko-stage65-build-plan.md),
-now twelve selective source pins, and a validation-only workspace patch. Clang
+the [full 658-project input manifest](../../experiments/weaver-aidl/validation-manifest.xml),
+and a validation-only workspace patch. Manifest-only initialization and official
+Repo parser validation succeeded. Full source checkout is blocked by measured
+capacity, documented in [stage 67 workspace evidence](twrp-rothko-stage67-workspace.json).
+Clang
 `r510928` / declared version `18.0.0` is present in the official AOSP snapshot;
 the source-level availability question is closed. See
 [stage 66 toolchain evidence](twrp-rothko-stage66-toolchain.json).
 Stage 64's **18/18** source checks and
 three regression scenarios remain the last adapter audit; they were not repeated.
-Actual host execution, a complete Android workspace, compilation, optimized-link
+Actual compiler execution, a complete source checkout, compilation, optimized-link
 retention, recovery dependency resolution, and FBE remain unverified.
 Draft PR #2 stays **HOLD**.
-**Resume:** workspace/build preparation at the end of this file. Earlier sections are
+**Resume:** provision a larger runner as described at the end of this file. Earlier sections are
 historical evidence; their old "next task" instructions are superseded.
 Packaging background: [stage 38 packaging, init, and size evidence](twrp-rothko-stage38-packaging.md).
 
@@ -270,3 +274,59 @@ versions and host compatibility. The sole proposed compile target remains
 still needs the existing separate owner authorization. Do not invent a successful
 workspace export or move to image generation, production integration, merge or
 flash while those gates remain open.
+
+## Checkpoint update — stage 67 (2026-10-18)
+
+- Initialized an actual **manifest-only** workspace with official Repo v2.54.
+  Initial public-key import hit an unavailable GPG agent. Configuring
+  `no-autostart` in the Repo-specific public keyring fixed that environment
+  issue; signature checks remained enabled and `--no-repo-verify` was not used.
+- The minimal manifest removes projects by both name and path. Its effective
+  count is 657 upstream projects, plus the Rothko project = **658**. Official
+  Repo parsing confirmed that count. No source project was synced/checked out.
+- Fetched the official AOSP superproject metadata at
+  `ab1b1f6b5fa52d8df1b45f3ac6faa607db843cac` (tag `android-14.0.0_r67`).
+  Its 1,357 gitlinks cover all 627 retained AOSP projects. The four earlier AOSP
+  pins match those gitlinks exactly.
+- Added `experiments/weaver-aidl/validation-manifest.xml`: all **658 project
+  revisions are full commit IDs**. Preserved the earlier 12 pins, resolved 623
+  additional AOSP inputs from official gitlinks, and resolved 23 remaining
+  GitHub branches from their upstream refs. Copy/link file rules are preserved.
+- Official Repo parser round-trip passed with all 658 identities and copy/link
+  rules intact. The local metadata workspace now selects this same frozen input.
+  This is a remote-resolved **input snapshot**, not `repo manifest -r` output
+  from actual source checkouts; that latter verification remains pending.
+- **Hard capacity blocker established:** complete recursive Git tree metadata
+  for three required projects gives these per-path raw blob totals:
+
+  | Project | Raw blob bytes |
+  | --- | ---: |
+  | Clang prebuilts | 13,189,910,350 |
+  | Rust prebuilts | 18,983,661,393 |
+  | SDK prebuilts | 4,288,360,936 |
+  | **Three-project total** | **36,461,932,679 (33.958 GiB)** |
+
+  This exceeds the session's entire **31.451 GiB** filesystem, before Git
+  databases, the other 655 projects, or build output. The metadata is complete
+  (not truncated) and its commit/tree identities are checked against official
+  AOSP metadata. This is a lower bound, not a measured total build-space budget.
+  No full source sync was attempted after establishing that bound.
+- Added `docs/validation/twrp-rothko-stage67-workspace.json` with source-lock,
+  parser, capacity and gate evidence. Updated the existing plan with full-manifest
+  runner setup; the selective overlay must not be stacked on that full manifest.
+- No C++ source change, repeated Verify audit, full source sync, post-checkout
+  manifest export, bootstrap/lunch, compilation, Actions run, new workflow/PR,
+  production integration, image creation, flash, merge or squash. PR #2 remains
+  Draft/HOLD and the default branch remains unchanged.
+
+### Next action — select/provision a larger build runner (HOLD)
+
+The current session cannot hold the selected source checkout. A larger Linux
+runner is required before further sync/build work. Select GitHub Actions with
+adequate storage or an available Linux build server, then use the committed full
+input manifest and the existing validation-only patch. No further source-only
+Verify/Clang audit is needed. After actual sync, export and compare all 658
+checkout revisions; then obtain the established authorization for the single
+`rothko_weaver_aidl_link_probe.recovery` build. Keep production/runtime/merge/flash
+gates separate. Do not retry a full sync in this 31.451 GiB environment or claim
+that the manifest-only workspace is a completed Android source checkout.

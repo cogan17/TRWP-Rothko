@@ -5,6 +5,12 @@ Update tahap 66: Clang yang dibutuhkan tersedia dalam source AOSP yang dipilih;
 identitas commit dan target symlink sudah diperiksa pada remote resmi. Bukti:
 [toolchain metadata](twrp-rothko-stage66-toolchain.json). Tidak perlu mengganti
 versi compiler. Workspace Android lengkap dan manifest hasil checkout belum ada.
+Update tahap 67: metadata workspace berhasil diinisialisasi dengan Repo v2.54.
+[Manifest input penuh](../../experiments/weaver-aidl/validation-manifest.xml)
+mematok seluruh **658 proyek** dan lolos parser resmi Repo. Source checkout
+masih terhalang kapasitas: tiga prebuilt wajib saja berjumlah **33,958 GiB**,
+sedangkan seluruh volume sesi **31,451 GiB**. Lihat
+[bukti workspace dan kapasitas](twrp-rothko-stage67-workspace.json).
 PR #2 tetap Draft/HOLD. Tidak ada perubahan pada vold produksi, integrasi HAL,
 workflow, atau cabang default. Rencana ini hanya menguji satu executable probe
 yang tidak dipasang dan tidak dijalankan pada perangkat.
@@ -31,13 +37,20 @@ FBE Android 16. Overlay selektif: [validation-pins.xml](../../experiments/weaver
 | `build/release` | `e4fc71a1aef3d297e11f710d4e31fc34f77bfd90` |
 | `prebuilts/clang/host/linux-x86` | `7154d3eddcb62ff7909a6ae2bf0c03e445e65bc4` |
 
-Overlay ini **bukan lock seluruh workspace**: proyek lain pada manifest masih
-mengikuti revision masing-masing. Setelah source disiapkan di checkout terpisah,
-ekspor `repo manifest -r -o resolved-manifest.xml`, simpan seluruh diff lokal dan
-hash patch, lalu gunakan snapshot itu untuk reproduksi. Jangan mengaku seluruh
-workspace sudah terkunci hanya berdasarkan dua belas pin di atas. Jika device tree
-sudah tercantum dalam local manifest lain, ganti entri itu; jangan menggandakan
-project pada path yang sama.
+Overlay dua belas pin di atas tetap merupakan overlay selektif. Untuk runner
+baru gunakan **validation-manifest.xml** yang sudah mematok semua 658 proyek:
+12 pin sebelumnya dipertahankan, 623 revision AOSP lain diambil dari gitlink
+superproject resmi `ab1b1f6b5fa52d8df1b45f3ac6faa607db843cac`, dan 23 branch
+GitHub lain diubah menjadi commit hasil pembacaan upstream. Aturan copy/link
+file dipertahankan dan diverifikasi melalui parser Repo.
+
+Gunakan manifest penuh itu sebagai manifest utama tanpa memasang overlay dua
+belas pin lagi, karena keduanya sudah memuat project device yang sama. Ini
+adalah **snapshot input yang diselesaikan dari remote**, belum hasil verifikasi
+checkout. Setelah source benar-benar disinkronkan, tetap ekspor
+`repo manifest -r -o resolved-manifest.xml`, cocokkan semua SHA, dan simpan diff
+serta hash patch. Keberhasilan parser tidak membuktikan ketersediaan seluruh
+objek remote atau keberhasilan build.
 
 Pada tahap 65, commit AOSP untuk AIDL, Binder dan build/release diperoleh dari annotated tag
 `android-14.0.0_r67` pada mirror `aosp-mirror-neo`; tag menunjuk ke commit yang
@@ -79,9 +92,25 @@ Jangan memulai sync besar atau menggunakan checkout kerja milik owner tanpa
 persetujuan. Tidak ada workspace Android lengkap atau runner yang disiapkan
 oleh tahap ini. Perintah berikut merupakan prosedur, belum dieksekusi.
 
-1. Siapkan manifest pada commit di atas. Tambahkan overlay selektif sebagai
-   local manifest, sync source, cocokkan dua belas SHA, dan ekspor manifest penuh.
-   Simpan versi `repo`, status/diff tiap project, dan hash kedua file validasi.
+1. Sediakan runner dengan kapasitas untuk seluruh source, metadata Git, dan
+   output build. Batas 33,958 GiB hanya mencakup tiga project; kebutuhan total
+   belum diukur. Di direktori baru, set `ROTHKO_MANIFEST_COMMIT` ke commit
+   handoff yang memuat manifest penuh ini, lalu gunakan:
+
+   ```bash
+   repo init -u https://github.com/cogan17/TRWP-Rothko.git \
+     -b "$ROTHKO_MANIFEST_COMMIT" \
+     -m experiments/weaver-aidl/validation-manifest.xml \
+     --depth=1 --repo-rev=v2.54 --no-clone-bundle --no-use-superproject
+   repo sync -c -j4 --fail-fast --no-clone-bundle
+   repo manifest -r -o resolved-manifest.xml
+   ```
+
+   Perintah sync dan export `-r` tersebut belum dijalankan di sesi ini. Jangan
+   menambahkan local manifest duplikat. Cocokkan semua 658 revision setelah sync;
+   simpan versi Repo, status/diff tiap project, dan hash file validasi. Jika GPG
+   agent tidak tersedia, diagnosis konfigurasi public keyring lebih dahulu;
+   jangan memakai `--no-repo-verify` untuk melewati verifikasi launcher.
 2. Periksa prebuilt yang dipilih Soong:
 
    ```bash

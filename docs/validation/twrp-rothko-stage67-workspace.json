@@ -1,0 +1,61 @@
+{
+  "stage": 67,
+  "observed_utc": "2026-10-18T13:21:11+00:00",
+  "manifest_project_count": 658,
+  "manifest_initialization_succeeded": true,
+  "repo_launcher_version": "v2.54",
+  "repo_source_commit": "97dc5c1bd9527c2abe2183b16a4b7ef037dc34a7",
+  "repo_signature_verification_disabled": false,
+  "repo_public_keyring_configuration": "no-autostart; public signature checks remain enabled",
+  "aosp_superproject_commit": "ab1b1f6b5fa52d8df1b45f3ac6faa607db843cac",
+  "aosp_gitlink_count": 1357,
+  "source_lock": {
+    "projects": 658,
+    "retained_existing_pins": 12,
+    "additional_aosp_pins": 623,
+    "additional_github_branch_pins": 23,
+    "manifest_sha256": "99aaab2aa1f7814faeb7d239ea61a725c694ce4b64d5f8da89ba59bfc6fe28fb",
+    "official_repo_parser_roundtrip_passed": true,
+    "project_identity_and_copy_link_rules_preserved": true,
+    "active_workspace_uses_frozen_input": true,
+    "default_group_project_count": 658
+  },
+  "capacity": {
+    "measured_projects": [
+      {
+        "path": "prebuilts/clang/host/linux-x86",
+        "commit": "7154d3eddcb62ff7909a6ae2bf0c03e445e65bc4",
+        "root_tree": "41e2a0ba0a8e00fe319ef181ff2ee20a043cdb93",
+        "raw_blob_bytes": 13189910350,
+        "tree_complete": true,
+        "official_root_tree_match": true
+      },
+      {
+        "path": "prebuilts/sdk",
+        "commit": "7a8acb7d37bfc84892f53931f667f3aa08932455",
+        "root_tree": "e90fd296a8f330ecce6c99d9c019bbf45cd82a86",
+        "raw_blob_bytes": 4288360936,
+        "tree_complete": true,
+        "official_root_tree_match": true
+      },
+      {
+        "path": "prebuilts/rust",
+        "commit": "4ebcd0d4c717e312c2773f4019e0874b994ac2b8",
+        "root_tree": "4470116b752ff9d7060c6b58976d0c1befadbd88",
+        "raw_blob_bytes": 18983661393,
+        "tree_complete": true,
+        "official_root_tree_match": true
+      }
+    ],
+    "three_project_raw_blob_bytes": 36461932679,
+    "filesystem_total_bytes": 33770192896,
+    "filesystem_free_bytes": 29315596288,
+    "includes_remaining_655_projects_git_data_or_build_outputs": false,
+    "full_checkout_fits_current_volume": false,
+    "sizing_note": "Raw per-path Git blob bytes for three required projects; excludes Git databases, the other 655 projects and build output. Not a total workspace estimate.",
+    "measured_projects_selected_by_default_groups": true
+  },
+  "source_projects_synced_or_checked_out": false,
+  "post_checkout_manifest_r_exported": false,
+  "probe_compiled_or_linked": false
+}

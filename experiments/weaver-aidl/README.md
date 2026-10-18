@@ -2,7 +2,7 @@
 
 This directory is an isolated source prototype for Rothko Android 16. It is **not** part of the recovery build: an opt-in `Android.bp` compile-probe target (not selected by product), no changes to upstream `system/vold`, and no runtime testing.
 
-**Current checkpoint: stage 66.** See the [pinned validation plan](../../docs/validation/twrp-rothko-stage65-build-plan.md),
+**Current checkpoint: stage 67.** See the [pinned validation plan](../../docs/validation/twrp-rothko-stage65-build-plan.md),
 selective [source overlay](validation-pins.xml), and unapplied
 [workspace patch](validation-workspace.patch). The last adapter source audit
 (stage 64) passed **18/18**, with three isolation regressions; it was not rerun.
@@ -11,6 +11,17 @@ added its commit as the twelfth selective pin, and recorded
 [toolchain evidence](../../docs/validation/twrp-rothko-stage66-toolchain.json).
 Full workspace preparation, host execution, C++ compilation, final optimized
 linking, recovery dependencies and FBE remain unverified. Earlier sections are historical.
+
+Stage 67 initialized a manifest-only workspace and prepared
+[validation-manifest.xml](validation-manifest.xml), with all **658 project
+revisions pinned** and accepted by the official Repo parser. The twelve earlier
+pins and copy/link rules are preserved. Use this full manifest as the main
+manifest for a new runner; do not stack `validation-pins.xml` on top of it.
+[Workspace evidence](../../docs/validation/twrp-rothko-stage67-workspace.json)
+records the capacity blocker: three required prebuilts alone contain 33.958 GiB
+of raw blob content, exceeding this session's entire 31.451 GiB volume. A larger
+runner is required for full source checkout. No full sync, post-checkout
+`repo manifest -r`, bootstrap, compilation or Actions run has occurred.
 
 Device evidence: Android registers `android.hardware.weaver.IWeaver/default` and the active user's synthetic-password directory contains both `.weaver` and `.secdis` files. Neither observation establishes which credential handle is active in recovery or guarantees a service will start in recovery.
 
