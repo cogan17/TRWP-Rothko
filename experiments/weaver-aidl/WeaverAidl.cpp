@@ -83,6 +83,11 @@ public:
         }
 
         result.timeout_ms = response.timeout > 0 ? response.timeout : 0;
+        // A positive timeout is a hard stop even if the HAL returns OK.
+        if (result.timeout_ms > 0) {
+            result.status = WeaverResult::kThrottled;
+            return result;
+        }
         switch (response.status) {
             case aw::WeaverReadStatus::OK:
                 if (response.timeout == 0 &&
