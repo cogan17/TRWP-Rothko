@@ -33,3 +33,13 @@ The isolated `Android.bp` target depends on `android.hardware.weaver-V2-ndk` and
 ## Stage 55 — source guardrails
 
 Run `python3 experiments/weaver-aidl/audit_source.py` from the repository checkout for a read-only source contract check. This script is intentionally **not** a compiler, Soong dependency resolver, unit test, or runtime proof. **Important:** `BoardConfig.mk` sets `ALLOW_MISSING_DEPENDENCIES := true`; do not interpret a green overall build as proof that Weaver AIDL was compiled and linked. Verify the probe's compile and link actions and ensure missing dependencies are not silently accepted. No Actions or flashing authorized.
+
+
+## Stage 58 — AIDL response and Binder audit (source-only)
+
+- NDK AIDL `byte[]` uses `std::vector<int8_t>`. Stage 57 converts the caller's unsigned key bytes to a signed AIDL vector before `read`. The response `value` can be copied into the unsigned output vector using iterator-based `assign` (integer conversion preserves the low eight bits); no additional conversion is necessary.
+- `getExceptionCode() == EX_SERVICE_SPECIFIC` is checked before `getServiceSpecificError()`; known `STATUS_INCORRECT_KEY` and `STATUS_THROTTLE` are handled. Unknown service-specific and transport errors remain `kFailed`, a conservative failure. Actual generated constant names and binder status API compatibility still require compilation.
+- A positive response timeout is treated as `kThrottled` even with an OK status. A negative timeout cannot yield success because the OK branch requires `response.timeout == 0`. The adapter performs no automatic retries and never calls `write`.
+- Do not mistake string-based source checks for behavioral unit tests. The current 14-check audit script has not been executed in a checked-out tree; generated AIDL header compatibility and service startup in recovery remain unverified.
+
+**Stage 59 next:** check whether the selected Weaver AIDL interface and generated NDK library can produce a recovery-compatible variant, and review exact `Android.bp` dependency linkage. Preserve isolation and Draft PR #2 HOLD; no Actions/build/flash/merge without approval.
