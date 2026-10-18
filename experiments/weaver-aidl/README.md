@@ -97,3 +97,11 @@ Added `LinkProbe.cpp` and a second Soong target, `rothko_weaver_aidl_link_probe`
 **Caveats:** The link probe has not been compiled or linked, and the exact recovery variant is not yet confirmed. `installable: false` prevents intended image installation but does not itself prove Soong generated the right variant. `main()` does not invoke `Verify()`, so full read-path symbol coverage remains a separate gate. Before approving a build, inspect generated recovery variants and confirm both Binder libraries resolve without missing-dependency stubs. Do not trigger Actions or flash.
 
 **Stage 63 next:** audit the link probe's source inclusion, ensure the read path is also referenced without executing credential operations, and strengthen static checks. Draft PR #2 HOLD.
+
+## Stage 63 — Verify read-path link reference (source-only)
+
+The non-installable `LinkProbe.cpp` now takes the address of `WeaverAidl::Verify` into a volatile pointer-to-member and does **not** invoke it. This is intended to retain the method and its Binder `read` references in a future link test, while avoiding credential operations. This is a link-test design, **not verified linker coverage** until compiled and its symbols/link map inspected. `main()` still contains `Connect()` and `GetConfig()` calls and **must not be executed** on a device.
+
+`audit_source.py` now has 16 simple source predicates (two added for non-installable link probe and non-invoked Verify reference). These are textual guards only, not a parser, build, or runtime test. No Actions, compilation, flashing, merge or PR status change.
+
+**Stage 64 next:** review Soong build-target semantics and whether the link probe's method-address retention survives optimized linking; adjust only if demonstrably necessary. Keep recovery variant availability unresolved until a separately approved build.
