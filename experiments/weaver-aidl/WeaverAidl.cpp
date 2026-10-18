@@ -8,6 +8,8 @@
 #include <android/binder_manager.h>
 #include <android/binder_auto_utils.h>
 #include <cstdint>
+#include <cstddef>
+#include <android/binder_status.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -36,6 +38,7 @@ public:
         constexpr char kService[] = "android.hardware.weaver.IWeaver/default";
         // Nonblocking lookup: do not hang recovery if service is absent.
         ndk::SpAIBinder binder(AServiceManager_checkService(kService));
+        if (!binder.get()) return false;
         service_ = aw::IWeaver::fromBinder(binder);
         return service_ != nullptr;
     }
