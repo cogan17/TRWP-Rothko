@@ -53,7 +53,7 @@
 </table>
 
 <p align="center">
-  <img src="https://i02.appmifile.com/29_operator_sg/27/09/2024/22f8ea2494791d3811281f6cbdd69091.png" 
+  <img src="https://i02.appmifile.com/29_operator_sg/27/09/2024/22f8ea2494791d3811281f6cbdd69091.png"
        alt="Xiaomi 14T Pro" width="600"/>
 </p>
 
@@ -62,13 +62,13 @@
 ## ✨ Features
 
 **Works:**
-- [x] ADB  
-- [x] Decryption (Android 16)  
-- [x] Display  
-- [x] Fastbootd  
-- [x] Flashing  
-- [x] MTP  
-- [x] Sideload  
-- [x] USB OTG  
-- [x] Vibrator  
+- [x] ADB
+- [x] Decryption (Android 16)
+- [x] Display
+- [x] Fastbootd
+- [x] Flashing
+- [x] MTP
+- [x] Sideload
+- [x] USB OTG
+- [x] Vibrator
 - [x] Miscellaneous
