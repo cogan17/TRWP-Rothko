@@ -6,6 +6,7 @@ import sys
 base = Path(__file__).resolve().parent
 src = (base / "WeaverAidl.cpp").read_text()
 bp = (base / "Android.bp").read_text()
+probe = (base / "LinkProbe.cpp").read_text()
 checks = {
     "AIDL v2 Soong dependency": '"android.hardware.weaver-V2-ndk"' in bp,
     "NDK Binder dependency": '"libbinder_ndk"' in bp,
@@ -20,6 +21,8 @@ checks = {
     "throttle status handled": "WeaverReadStatus::THROTTLE" in src,
     "positive timeout hard stop": "if (result.timeout_ms > 0)" in src,
     "incorrect key handled": "WeaverReadStatus::INCORRECT_KEY" in src,
+    "opt-in non-installable link probe": 'name: "rothko_weaver_aidl_link_probe"' in bp and "installable: false" in bp,
+    "Verify symbol referenced without invocation": "&rothko::crypto::WeaverAidl::Verify" in probe and "adapter.Verify(" not in probe and "verify_reference" in probe,
     "payload length checked": "response.value.size() == static_cast<size_t>(config.valueSize)" in src,
 }
 for label, ok in checks.items():
