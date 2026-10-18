@@ -146,9 +146,6 @@ Return<MergeStatus> BootControl::getSnapshotMergeStatus() {
 
 // Methods from ::android::hardware::boot::V1_2::IBootControl follow.
 Return<uint32_t> BootControl::getActiveBootSlot() {
-    if (!impl_.GetActiveBootSlot()) {
-        return 0;
-    }
     return impl_.GetActiveBootSlot();
 }
 
