@@ -1,0 +1,12 @@
+// Experimental compile-only target. Not included in PRODUCT_PACKAGES or libvold.
+// Build explicitly with: m rothko_weaver_aidl_probe
+cc_library_static {
+    name: "rothko_weaver_aidl_probe",
+    srcs: ["WeaverAidl.cpp"],
+    recovery_available: true,
+    shared_libs: [
+        "android.hardware.weaver-V2-ndk",
+        "libbinder_ndk",
+    ],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
