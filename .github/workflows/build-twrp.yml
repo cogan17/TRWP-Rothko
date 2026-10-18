@@ -14,17 +14,28 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
-      # Source + out/ need ~80 GB; merge the runner's free root and /mnt space into the workspace
-      - uses: easimon/maximize-build-space@v10
-        with:
-          # 8 GB for tools + 16 GB for a real swapfile (see Build step)
-          root-reserve-mb: 24576
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+      # No loop-backed LVM (maximize-build-space): heavy I/O + memory pressure on it hung the VM
+      # three times ("runner lost communication"). Use the real / and /mnt disks instead.
+      - name: Prepare disks, swap and memory cap
+        run: |
+          sudo swapoff -a && sudo rm -f /mnt/swapfile
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -a -f >/dev/null || true
+          r=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
+          m=$(df -BG --output=avail /mnt | tail -1 | tr -dc 0-9)
+          echo "::notice title=Disk after cleanup::/ ${r}G free, /mnt ${m}G free"
+          # source (~50 GB) on the larger disk, out/ and swap on the other
+          if [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
+          else src=/twrp; out=/mnt/out; swap=/mnt/swapfile; fi
+          sudo mkdir -p "$src" "$out" && sudo chown "$USER" "$src" "$out"
+          sudo fallocate -l 16G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
+          echo "SRC=$src" >> "$GITHUB_ENV"
+          echo "OUT_DIR=$out" >> "$GITHUB_ENV"
+          # sync and build join this cgroup, so the runner agent always keeps RAM
+          # and an OOM kills only our processes
+          sudo mkdir /sys/fs/cgroup/build
+          echo 12G | sudo tee /sys/fs/cgroup/build/memory.max
+          free -h
 
       - name: Install build tools
         run: |
@@ -38,41 +49,33 @@ jobs:
           echo "$HOME/bin" >> "$GITHUB_PATH"
           git config --global user.name github-actions
           git config --global user.email github-actions@users.noreply.github.com
-          df -h
 
       - name: Sync TWRP 14.1 minimal manifest
         run: |
-          mkdir twrp && cd twrp
+          echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs >/dev/null
+          cd "$SRC"
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14.1
           repo sync -c -j"$(nproc --all)" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
-          df -h .
+          echo "::notice title=Disk after sync::$(df -h --output=target,avail / /mnt | tail -n +2 | tr -s ' ' | tr '\n' ' ')"
 
       - uses: actions/checkout@v4
         with:
-          path: twrp/device/xiaomi/rothko
+          path: device-tree
 
       - name: Build vendor_boot.img
         run: |
-          # Swap on the action's loop-backed LVM can hang the VM under memory pressure
-          # (runner "lost communication" twice at ~46 min); use a plain swapfile instead
-          sudo swapoff -a
-          sudo fallocate -l 16G /swapfile && sudo chmod 600 /swapfile
-          sudo mkswap /swapfile && sudo swapon /swapfile
-          # Cap the build at 12G RAM so the runner agent always keeps memory;
-          # an OOM then kills only the build and the error stays readable
-          sudo mkdir /sys/fs/cgroup/build
-          echo 12G | sudo tee /sys/fs/cgroup/build/memory.max
-          echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs
-          free -h
-          cd twrp
+          echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs >/dev/null
+          mkdir -p "$SRC/device/xiaomi"
+          cp -a device-tree "$SRC/device/xiaomi/rothko"
+          cd "$SRC"
           {
             export ALLOW_MISSING_DEPENDENCIES=true
             source build/envsetup.sh
             # 14.1 lunch requires <product>-<release>-<variant>
             lunch twrp_rothko-ap2a-eng || lunch twrp_rothko-trunk_staging-eng
             mka vendorbootimage
-          } 2>&1 | tee build.log
-          cd out/target/product/rothko
+          } 2>&1 | tee "$OUT_DIR/build.log"
+          cd "$OUT_DIR/target/product/rothko"
           sha256sum vendor_boot.img | tee vendor_boot.img.sha256
           echo "::notice title=vendor_boot.img::$(stat -c%s vendor_boot.img) bytes, sha256 $(cut -d' ' -f1 vendor_boot.img.sha256)"
 
@@ -80,15 +83,16 @@ jobs:
       - name: Report build error
         if: failure()
         run: |
-          f=twrp/out/error.log
-          [ -s "$f" ] || f=twrp/build.log
+          f="$OUT_DIR/error.log"
+          [ -s "$f" ] || f="$OUT_DIR/build.log"
           [ -s "$f" ] || exit 0
           msg=$(tail -c 3500 "$f" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | sed ':a;N;$!ba;s/\n/%0A/g')
           echo "::error title=Build error::$msg"
+          echo "::notice title=Disk at failure::$(df -h --output=target,avail / /mnt | tail -n +2 | tr -s ' ' | tr '\n' ' ')"
 
       - uses: actions/upload-artifact@v4
         with:
           name: twrp-rothko-vendor_boot-${{ github.run_number }}
           path: |
-            twrp/out/target/product/rothko/vendor_boot.img
-            twrp/out/target/product/rothko/vendor_boot.img.sha256
+            ${{ env.OUT_DIR }}/target/product/rothko/vendor_boot.img
+            ${{ env.OUT_DIR }}/target/product/rothko/vendor_boot.img.sha256
