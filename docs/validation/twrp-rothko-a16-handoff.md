@@ -93,3 +93,16 @@ Draft PR #2 and Issue #1 remain the single tracking artifacts; HOLD merge and sq
 - Draft PR #2 `https://github.com/cogan17/TRWP-Rothko/pull/2` **HOLD**, Issue #1 remains tracking.
 - No Actions, TWRP image build, flashing, merge or runtime validation performed in stages 39–56.
 - One checkpoint, no duplicate PRs or needless workflow reruns. Continue with user command **"Lanjutkan"**.
+
+
+## Checkpoint update — stage 57 (2026-10-18)
+
+**Resume from stage 58.** Stage 57 found a concrete NDK AIDL C++ type mismatch: AIDL `byte[]` maps to `std::vector<int8_t>`, whereas the prototype passed `std::vector<uint8_t>` to `IWeaver::read`. Added a local `std::vector<int8_t> aidl_key(key.begin(), key.end())` conversion before the call. This is source-only; no build was run.
+
+- Commit `640957367dfbb901e35ac49e1a6cf13432765401`: fix signed-byte conversion in `experiments/weaver-aidl/WeaverAidl.cpp`.
+- Commit `28f3fdf2791a18608e0bc6eeb19b41a1fad8ada1`: add signed-byte conversion check to `experiments/weaver-aidl/audit_source.py`. Source checks now number **14**; updated script has not been executed.
+- The isolated `rothko_weaver_aidl_probe` remains opt-in and uncompiled. Adapter is not linked into TeamWin `libvold`; Weaver NXP HAL availability in recovery remains unverified.
+- No Actions, real build, runtime validation, flashing, PR merge or squash. Draft PR #2 stays **HOLD**. Default branch untouched.
+
+### Next task — stage 58
+Inspect generated NDK AIDL API signatures and Binder exception/status mapping for further source-level defects, particularly response `std::vector<int8_t>` conversion, exception constants, and correct service-specific error codes. Apply only provable minimal fixes, update source guardrails, and keep the prototype isolated. Do not repeat device diagnostics or previous audit. Any compilation/Actions/flashing requires separate owner authorization under established guardrails.
