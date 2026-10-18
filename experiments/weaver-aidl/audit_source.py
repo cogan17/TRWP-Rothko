@@ -17,6 +17,7 @@ checks = {
     "slot range validation": "slot < 0 || slot >= config.slots" in src,
     "key length validation": "key.size() != static_cast<size_t>(config.keySize)" in src,
     "throttle status handled": "WeaverReadStatus::THROTTLE" in src,
+    "positive timeout hard stop": "if (result.timeout_ms > 0)" in src,
     "incorrect key handled": "WeaverReadStatus::INCORRECT_KEY" in src,
     "payload length checked": "response.value.size() == static_cast<size_t>(config.valueSize)" in src,
 }
