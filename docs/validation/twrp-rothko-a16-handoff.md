@@ -123,3 +123,17 @@ Inspect generated NDK AIDL API signatures and Binder exception/status mapping fo
 
 ### Next task — stage 63
 Audit the link probe for real linker coverage of the `Verify()` read path without executing credential operations, and add minimal static checks. Avoid production integration, duplicate PRs or speculative HAL startup modifications. Confirm source changes before reporting success; do not build or trigger Actions without explicit authorization.
+
+
+## Checkpoint update — stage 63 (2026-10-18)
+
+**Resume at stage 64.** The prior checkpoint through stage 62 is retained; do not repeat completed steps.
+
+- Stage 63 changed `experiments/weaver-aidl/LinkProbe.cpp` to retain a pointer-to-member reference to `WeaverAidl::Verify` without calling `Verify` or accessing credentials. Commit `7b13dfd3736372c6ffbfbebe5f49739641c52693`.
+- Added two textual predicates to `experiments/weaver-aidl/audit_source.py`, for the non-installable opt-in link probe and non-invoked `Verify` reference. Total **16 source predicates**; not executed in a checkout. Commit `067a54c296d947303c98db56bd153f47eb9a4239`.
+- Updated `experiments/weaver-aidl/README.md` documenting scope and limitations. Commit `30d8f91e829cb35915401ab5cb49d4ba5142ac60`.
+- The pointer-to-member reference is **not yet proof** that the final optimized link retains the entire `Verify` read path. Compile, symbol inspection, linker map, and recovery dependency resolution remain unverified.
+- No Actions, build, linking, runtime tests, flashing, merge, squash, or production `libvold` integration. Default `twrp-14.1_a16` untouched; Draft PR #2 **HOLD**.
+
+### Next task — stage 64
+Audit optimization and linker retention semantics of the opt-in link probe, including the volatile pointer-to-member reference. Make only minimal, provable source changes and update source checks as needed. Do not run or install the probe; do not trigger Actions or compilation without explicit owner authorization. Preserve the isolation and production safeguards.
