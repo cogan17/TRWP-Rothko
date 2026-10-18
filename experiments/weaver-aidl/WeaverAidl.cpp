@@ -11,7 +11,6 @@
 #include <cstddef>
 #include <android/binder_status.h>
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace rothko::crypto {
@@ -35,6 +34,7 @@ struct WeaverReadResult {
 class WeaverAidl {
 public:
     bool Connect() {
+        service_.reset();
         constexpr char kService[] = "android.hardware.weaver.IWeaver/default";
         // Nonblocking lookup: do not hang recovery if service is absent.
         ndk::SpAIBinder binder(AServiceManager_checkService(kService));
@@ -82,7 +82,7 @@ public:
             return result;
         }
 
-        result.timeout_ms = response.timeout;
+        result.timeout_ms = response.timeout > 0 ? response.timeout : 0;
         switch (response.status) {
             case aw::WeaverReadStatus::OK:
                 if (response.timeout == 0 &&
