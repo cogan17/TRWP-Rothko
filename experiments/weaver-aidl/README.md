@@ -2,11 +2,12 @@
 
 This directory is an isolated source prototype for Rothko Android 16. It is **not** part of the recovery build: an opt-in `Android.bp` compile-probe target (not selected by product), no changes to upstream `system/vold`, and no runtime testing.
 
-**Current checkpoint: stage 64.** Local source audit: **18/18 PASS**; three
-product-isolation regression scenarios passed. The Verify reference now has
-explicit compiler/linker retention attributes. These are source results only;
-C++ compilation, final optimized linking, recovery dependencies and FBE remain
-unverified. Earlier stage sections below record historical findings.
+**Current checkpoint: stage 65.** See the [pinned validation plan](../../docs/validation/twrp-rothko-stage65-build-plan.md),
+selective [source overlay](validation-pins.xml), and unapplied
+[workspace patch](validation-workspace.patch). The last adapter source audit
+(stage 64) passed **18/18**, with three isolation regressions; it was not rerun.
+C++ compilation, compiler prebuilt availability, final optimized linking,
+recovery dependencies and FBE remain unverified. Earlier sections are historical.
 
 Device evidence: Android registers `android.hardware.weaver.IWeaver/default` and the active user's synthetic-password directory contains both `.weaver` and `.secdis` files. Neither observation establishes which credential handle is active in recovery or guarantees a service will start in recovery.
 

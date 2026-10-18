@@ -1,20 +1,22 @@
 # TWRP Rothko Android 16 — development handoff
 
-Checkpoint: 2026-10-18, stage 64. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
+Checkpoint: 2026-10-18, stage 65. Branch: `fix/metadata-f2fs`; base: `twrp-14.1_a16`.
 
-Resumed from stage-63 commit `e86b8290f015c732820c40e74975718900b68039`.
-**Current result:** explicit compiler/linker retention on the isolated Verify
-reference; local source audit **18/18 PASS**, plus three isolation-guard
-regression scenarios. Compilation, optimized-link retention, recovery variants,
-and FBE remain unverified. Draft PR #2 stays **HOLD**.
-**Resume:** the stage-65 task at the end of this file. Earlier sections are
+Resumed from stage-64 commit `c471f27f7811c0e96bca5a824f7281dd1a4fdabe`.
+**Current result:** [stage 65 build-validation plan](twrp-rothko-stage65-build-plan.md),
+eleven selective source pins, and a validation-only workspace patch. XML structure
+and patch applicability checked locally. Stage 64's **18/18** source checks and
+three regression scenarios remain the last adapter audit; they were not repeated.
+Compiler prebuilt availability, compilation, optimized-link retention, recovery
+dependency resolution, and FBE remain unverified. Draft PR #2 stays **HOLD**.
+**Resume:** the stage-66 task at the end of this file. Earlier sections are
 historical evidence; their old "next task" instructions are superseded.
 Packaging background: [stage 38 packaging, init, and size evidence](twrp-rothko-stage38-packaging.md).
 
 ## Tracking
 - Issue: https://github.com/cogan17/TRWP-Rothko/issues/1
 - Draft PR (HOLD): https://github.com/cogan17/TRWP-Rothko/pull/2
-- Last audited code commit: `3f1d281acc7636e0a2d71d3ee4144b21ebaecdca` (8 commits ahead of base, 6 changed files before this documentation commit).
+- Last adapter code/audit commit: `c471f27f7811c0e96bca5a824f7281dd1a4fdabe`. The original F2FS/boot-control source audit used `3f1d281acc7636e0a2d71d3ee4144b21ebaecdca`.
 - PR remains open and draft; mergeability is not a build or runtime validation result. Do not squash merge yet.
 
 ## Completed source changes
@@ -181,3 +183,43 @@ probe speculatively. A green archive or system variant is insufficient, especial
 with `ALLOW_MISSING_DEPENDENCIES := true`. Real compilation/Actions, device tests,
 and merge/flash remain separate gates; keep the current HOLD until authorized
 validation establishes them.
+
+## Checkpoint update — stage 65 (2026-10-18)
+
+- Added `docs/validation/twrp-rothko-stage65-build-plan.md` with exact source
+  identities, target selection, failure criteria, and required ELF/link evidence.
+- Added opt-in `experiments/weaver-aidl/validation-pins.xml`: eleven unique
+  source paths at full commit IDs. It is explicitly a selective overlay, not a
+  complete workspace lock. Full `repo manifest -r` and local diffs are still
+  required after source preparation; no full Android workspace was synced here.
+- Pinned Soong selects `clang-r510928` / short version 18. Availability and
+  actual compiler/linker versions in the selected AOSP snapshot are unverified.
+- Pinned Soong names the recovery variant with `.recovery`. The planned single
+  target is `rothko_weaver_aidl_link_probe.recovery`; the core target or archive
+  is not a substitute. Verbose Ninja arguments are supported by pinned source.
+- Traced AIDL `Recovery_available` propagation into generated native libraries;
+  Weaver lacks that declaration, while the pinned Binder NDK declares it.
+  Pinned envsetup requires a three-part lunch; AOSP release map provides `ap2a`.
+- Prepared `experiments/weaver-aidl/validation-workspace.patch` to enable
+  Weaver's recovery declaration, use `ap2a` lunch choices, and make missing
+  dependencies fail in a disposable validation checkout. It is **not applied**
+  to production files or any real Android build workspace.
+- Local checks: XML parses with eleven distinct immutable revision entries;
+  `git apply --check` passes against the three exact pinned reference files.
+  These checks establish neither full repo manifest resolution nor compilation.
+- Direct Gitiles reads failed; AOSP tagged source was inspected via mirror,
+  with tag objects resolved to exact commits. Primary-remote identity checks
+  remain part of workspace preparation; the build overlay keeps AOSP remotes.
+- No build, bootstrap/lunch, Actions, image creation, probe execution, credential
+  operations, flash, merge, squash, production integration, or new PR.
+
+### Next task — stage 66
+
+Close the source/workspace preflight: establish whether the manifest-selected
+Clang prebuilt contains `clang-r510928`; verify the pinned source identities in
+a suitable disposable Android workspace and export a complete resolved manifest.
+If the toolchain is missing, prepare an explicit, reviewed source/toolchain pin
+correction rather than silently swapping compiler versions. Do not repeat the
+Verify audit or add speculative probe code. The reviewed stage-65 procedure is
+the concrete scope for the separately authorized single recovery probe build;
+no image build, runtime test, merge or flash is included in that scope.
