@@ -89,3 +89,11 @@ Before a production integration, with owner approval and a matching Soong checko
 5. Even a linked target cannot prove that NXP Weaver starts in recovery or that FBE decrypts.
 
 **Stage 62 next:** design an isolated, no-install link probe or audit upstream recovery variant support before introducing it. Do not modify production vold or claim runtime readiness. Draft PR #2 HOLD; no Actions/build/flash/merge.
+
+## Stage 62 — opt-in link probe (unbuilt)
+
+Added `LinkProbe.cpp` and a second Soong target, `rothko_weaver_aidl_link_probe` (`cc_binary`, `recovery_available: true`, `installable: false`). Its translation unit includes the experimental `WeaverAidl.cpp` directly to force the Binder/AIDL methods into the link graph without duplicating a compiled object. This is temporary probe-only structure, **not** an integration pattern for production. The program must not be run on a phone or installed into recovery; `main()` references `Connect()` and `GetConfig()` only for linker coverage.
+
+**Caveats:** The link probe has not been compiled or linked, and the exact recovery variant is not yet confirmed. `installable: false` prevents intended image installation but does not itself prove Soong generated the right variant. `main()` does not invoke `Verify()`, so full read-path symbol coverage remains a separate gate. Before approving a build, inspect generated recovery variants and confirm both Binder libraries resolve without missing-dependency stubs. Do not trigger Actions or flash.
+
+**Stage 63 next:** audit the link probe's source inclusion, ensure the read path is also referenced without executing credential operations, and strengthen static checks. Draft PR #2 HOLD.
