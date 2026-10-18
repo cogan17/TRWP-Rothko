@@ -90,7 +90,7 @@ AB_OTA_PARTITIONS += \
     vendor_boot \
     vendor_dlkm \
     mi_ext
-    
+
 PRODUCT_PACKAGES += \
     update_engine \
     update_engine_sideload \
@@ -130,12 +130,12 @@ PRODUCT_PACKAGES += \
     android.hardware.keymaster@4.1 \
     android.hardware.keymaster@4.0 \
     android.hardware.keymaster@3.0
-    
+
 # Mtk plpath utils
 PRODUCT_PACKAGES += \
     mtk_plpath_utils \
     mtk_plpath_utils.recovery
-    
+
 # Otacert
 PRODUCT_EXTRA_RECOVERY_KEYS += \
     $(DEVICE_PATH)/security/miui_releasekey
