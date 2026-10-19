@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       twrp_run_id:
-        description: 'Run id of the "Build TWRP" run'
+        description: 'Run id of the "Build TWRP" run (recovery/root of this commit is applied on top)'
       stock_run_id:
         description: 'Run id of the "Extract stock blobs" run'
 
@@ -18,8 +18,6 @@ permissions:
 
 env:
   TWRP_RUN: ${{ github.event.workflow_run.id || inputs.twrp_run_id }}
-  STOCK_RUN: ${{ inputs.stock_run_id || '39179296762' }}
-  VERSION: OS3.0.301.0.WNNIDXM
 
 jobs:
   verify:
@@ -33,6 +31,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: repo
+
+      # firmware the device tree was extracted from (written by "Extract stock blobs")
+      - name: Load firmware info
+        env:
+          INPUT_STOCK_RUN: ${{ inputs.stock_run_id }}
+        run: |
+          . repo/.github/firmware.env
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "STOCK_RUN=${INPUT_STOCK_RUN:-$STOCK_RUN}" >> "$GITHUB_ENV"
 
       - uses: actions/download-artifact@v4
         with:
@@ -54,7 +61,85 @@ jobs:
         run: |
           sudo apt-get -o Acquire::Retries=3 install -y lz4 zstd cpio >/dev/null
           git clone -q --depth 1 https://android.googlesource.com/platform/system/tools/mkbootimg ~/mkbootimg
+          git clone -q --depth 1 https://android.googlesource.com/platform/external/avb ~/avb
           (cd twrp && sha256sum -c vendor_boot.img.sha256)
+          # Stock keeps recovery in its own fragment (type RECOVERY, name "recovery") that the
+          # bootloader adds only in recovery mode. TWRP built as one platform fragment boots Android
+          # but never reached the kernel in recovery mode, so split it the same way: normal boot
+          # gets lib/ and first_stage_ramdisk/, recovery mode gets both (= the original content).
+          python3 ~/mkbootimg/unpack_bootimg.py --boot_img twrp/vendor_boot.img --out u-orig --format=mkbootimg -0 > orig.args
+          [ "$(ls u-orig | grep vendor_ramdisk)" = vendor_ramdisk00 ]
+          zstd -dc u-orig/vendor_ramdisk00 > all.cpio
+          # Fast path: the build copies recovery/root verbatim, so overlaying this commit's copy gives
+          # the same result for ramdisk-only changes (rc, scripts, blobs) without a 2-hour rebuild.
+          # shortcut: files deleted from recovery/root stay in the image; rebuild after deleting any
+          python3 - <<'EOF'
+          import os
+          d = open('all.cpio', 'rb').read()
+          entries, pos = {}, 0  # name -> raw newc entry, in archive order
+          while True:
+              h = d[pos:pos + 110]
+              assert h[:6] == b'070701', pos  # newc, as written by mkbootfs
+              namesize, filesize = int(h[94:102], 16), int(h[54:62], 16)
+              name = d[pos + 110:pos + 109 + namesize].decode()
+              end = pos + ((110 + namesize + 3) & ~3) + ((filesize + 3) & ~3)
+              if name == 'TRAILER!!!':
+                  break
+              entries[name] = d[pos:end]
+              pos = end
+          assert not d[end:].strip(b'\0')
+          trailer = d[pos:end]
+          field = lambda raw, i: int(raw[6 + 8 * i:14 + 8 * i], 16)  # 0 ino 1 mode 6 filesize 11 namesize
+          data_of = lambda raw: raw[(110 + field(raw, 11) + 3) & ~3:][:field(raw, 6)]
+          ino = max(field(r, 0) for r in entries.values())
+
+          def entry(name, mode, data, like):
+              global ino
+              # a replaced file keeps the build's mode/owner (fs_config); a new one gets root and git's mode
+              f = [field(like, i) for i in range(13)] if like else [ino := ino + 1, mode, 0, 0, 1 + (mode >> 12 == 4), 0, 0, 0, 0, 0, 0, 0, 0]
+              f[6], f[11] = len(data), len(name) + 1
+              h = b'070701' + b''.join(b'%08X' % v for v in f) + name.encode() + b'\0'
+              return h + b'\0' * (-len(h) % 4) + data + b'\0' * (-len(data) % 4)
+
+          root, changed = 'repo/recovery/root', []
+          for dp, dns, fns in os.walk(root):
+              dns.sort()
+              for n in dns + sorted(fns):
+                  p = os.path.join(dp, n)
+                  rel, link = os.path.relpath(p, root), os.path.islink(p)
+                  if os.path.isdir(p) and not link:
+                      if rel not in entries:
+                          entries[rel] = entry(rel, 0o40755, b'', None)
+                      continue
+                  data = os.readlink(p).encode() if link else open(p, 'rb').read()
+                  old = entries.get(rel)
+                  if old is None or data_of(old) != data:
+                      mode = 0o120777 if link else 0o100755 if os.access(p, os.X_OK) else 0o100644
+                      entries[rel] = entry(rel, mode, data, old)
+                      changed.append(rel)
+          if changed:
+              print('::notice title=Updated from recovery/root::' + ';'.join(changed))
+          out = {'platform': bytearray(), 'recovery': bytearray()}
+          for name, raw in entries.items():
+              out['platform' if name.split('/')[0] in ('lib', 'first_stage_ramdisk') else 'recovery'] += raw
+          for k, o in out.items():
+              open(k + '.cpio', 'wb').write(o + trailer)
+          EOF
+          for f in platform recovery; do zstd -19 -T0 -q -c $f.cpio > $f.cpio.zst; done
+          mapfile -d '' a < orig.args
+          for i in "${!a[@]}"; do [ "${a[i]}" = --ramdisk_type ] && break; done
+          # the dtb also changes with firmware updates: take the device tree's, like recovery/root
+          for j in "${!a[@]}"; do [ "${a[j]}" = --dtb ] && a[j+1]=repo/prebuilt/dtb; done
+          python3 ~/mkbootimg/mkbootimg.py "${a[@]:0:i}" \
+            --ramdisk_type platform --ramdisk_name '' --vendor_ramdisk_fragment platform.cpio.zst \
+            --ramdisk_type recovery --ramdisk_name recovery --vendor_ramdisk_fragment recovery.cpio.zst \
+            --vendor_boot split.img
+          # keep the AVB hash footer the build added
+          if python3 ~/avb/avbtool.py info_image --image twrp/vendor_boot.img >/dev/null 2>&1; then
+            python3 ~/avb/avbtool.py add_hash_footer --image split.img --partition_name vendor_boot \
+              --partition_size $(stat -c%s twrp/vendor_boot.img)
+          fi
+          mv split.img twrp/vendor_boot.img
           unpack() {
             case "$(head -c4 "$1" | od -An -tx1 | tr -d ' ')" in
               02214c18) lz4 -dc "$1" ;;
@@ -86,17 +171,21 @@ jobs:
         run: |
           bad=0
           check() { if eval "$2"; then echo "::notice title=OK::$1"; else echo "::error title=FAIL::$1"; bad=1; fi; }
-          tw=$(grep -m1 'vendor ramdisk total size' twrp.txt | grep -o '[0-9]*$')
+          tw=$(grep -A3 'vendor_ramdisk00: {' twrp.txt | grep -m1 'size:' | grep -o '[0-9]*$')
           st=$(grep -A3 'vendor_ramdisk00: {' stock.txt | grep -m1 'size:' | grep -o '[0-9]*$')
-          # 3be0761f (65 MB lz4 ramdisk) bootlooped; stock normal boot loads its 41 MB platform fragment
-          check "TWRP ramdisk $tw bytes <= stock normal-boot ramdisk $st bytes" '[ "$tw" -le "$st" ]'
+          # stock normal boot loads only its 41 MB platform fragment
+          check "TWRP normal-boot fragment $tw bytes <= stock $st bytes" '[ "$tw" -le "$st" ]'
+          lay() { grep -E '^ +(type|name):' $1.txt | tr -d ' \n'; }
+          check "fragment layout matches stock: $(lay stock)" '[ "$(lay twrp)" = "$(lay stock)" ]'
+          check "image fits the vendor_boot partition" '[ $(stat -c%s twrp/vendor_boot.img) -le $(stat -c%s stock/vendor_boot.img) ]'
           check "ramdisk is zstd" '[ "$(head -c4 u-twrp/vendor_ramdisk00 | od -An -tx1 | tr -d " ")" = 28b52ffd ]'
           check "dtb identical to stock" 'cmp -s u-twrp/dtb u-stock/dtb'
-          check "TWRP UI present (twres/, system/bin/recovery)" '[ -d r-twrp/twres ] && [ -e r-twrp/system/bin/recovery ]'
+          check "TWRP UI in recovery fragment (twres/, system/bin/recovery)" '[ -d frag-twrp-vendor_ramdisk01/twres ] && [ -e frag-twrp-vendor_ramdisk01/system/bin/recovery ]'
           check "twrp.flags present" '[ -f r-twrp/system/etc/twrp.flags ]'
-          check "first-stage fstab matches stock" 'cmp -s r-twrp/first_stage_ramdisk/fstab.mt6989 r-stock/first_stage_ramdisk/fstab.mt6989'
-          # Android's normal boot loads these from vendor_boot too, so they must equal stock
-          d=$(diff -rq r-twrp/lib/modules r-stock/lib/modules || true)
+          check "every program in TWRP finds its libraries and linker" 'o=$(python3 repo/.github/scripts/recovery_deps.py r-twrp) && [ -z "$o" ]'
+          # Android's normal boot reads these from the platform fragment, so they must equal stock
+          check "first-stage fstab matches stock" 'cmp -s frag-twrp-vendor_ramdisk00/first_stage_ramdisk/fstab.mt6989 frag-stock-vendor_ramdisk00/first_stage_ramdisk/fstab.mt6989'
+          d=$(diff -rq frag-twrp-vendor_ramdisk00/lib/modules frag-stock-vendor_ramdisk00/lib/modules || true)
           check "lib/modules identical to stock ($(ls r-stock/lib/modules | wc -l) files)" '[ -z "$d" ]'
           [ -z "$d" ] || echo "::warning title=modules diff::$(echo "$d" | head -20 | tr '\n' ';')"
           exit $bad

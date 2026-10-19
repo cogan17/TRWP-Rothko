@@ -31,8 +31,8 @@ jobs:
           r=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
           m=$(df -BG --output=avail /mnt | tail -1 | tr -dc 0-9)
           echo "::notice title=Disk after cleanup::/ ${r}G free, /mnt ${m}G free"
-          # source (~50 GB) on the larger disk, out/ and swap on the other
-          if [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
+          # source (~50 GB) on one disk, out/ and swap on the other. Both disks normally have ~120 GB
+          if [ "$m" -ge 100 ] || [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
           else src=/twrp; out=/mnt/out; swap=/mnt/swapfile; fi
           sudo mkdir -p "$src" "$out" && sudo chown "$USER" "$src" "$out"
           sudo fallocate -l 16G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
@@ -58,11 +58,23 @@ jobs:
           git config --global user.name github-actions
           git config --global user.email github-actions@users.noreply.github.com
 
+      - uses: actions/checkout@v4
+        with:
+          path: device-tree
+
       - name: Sync TWRP 14.1 minimal manifest
         run: |
           echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs >/dev/null
           cd "$SRC"
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14.1
+          # TeamWin/LineageOS forks follow branches; the lock pins them (Update TWRP sources workflow)
+          lock="$GITHUB_WORKSPACE/device-tree/.github/twrp-sources.lock.xml"
+          if [ -f "$lock" ]; then
+            mkdir -p .repo/local_manifests && cp "$lock" .repo/local_manifests/
+            echo "::notice title=TWRP sources::pinned by twrp-sources.lock.xml ($(grep -c '<extend-project' "$lock") projects)"
+          else
+            echo "::warning title=TWRP sources::no lock, using the latest commits of every branch"
+          fi
           repo sync -c -j"$(nproc --all)" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
           # reference ABI dumps only feed optional ABI checks (skipped when missing); frees ~5.6G for swap
           rm -rf prebuilts/abi-dumps
@@ -72,10 +84,6 @@ jobs:
             -e 's/android\.system\.keystore2-V1-ndk_platform/android.system.keystore2-V4-ndk/g' \
             -e 's/-ndk_platform/-ndk/g'
           echo "::notice title=Disk after sync::$(df -h --output=avail / | tail -1) free; biggest: $(du -sh .repo prebuilts/* external/* 2>/dev/null | sort -h | tail -6 | tr '\t\n' ' ;')"
-
-      - uses: actions/checkout@v4
-        with:
-          path: device-tree
 
       - name: Build vendor_boot.img
         run: |
@@ -95,6 +103,17 @@ jobs:
             lunch twrp_rothko-ap2a-eng || lunch twrp_rothko-trunk_staging-eng
             # -k: keep going past the first failure so one run reports every broken file
             mka vendorbootimage -k
+            # TWRP's relink lists lag behind vold (keystore2-V1 vs V4, ...) and copy the bootstrap
+            # servicemanager: fill the gaps in recovery/root, then repack if anything changed
+            # not fatal here: the verify workflow's gate decides, and it reruns in minutes, not hours
+            fixed=$(python3 device/xiaomi/rothko/.github/scripts/recovery_deps.py "$OUT/recovery/root" \
+              "$OUT/system/lib64" "$OUT/system_ext/lib64" "$OUT/vendor/lib64" "$OUT_DIR/soong/.intermediates") ||
+              echo "::warning title=Recovery deps::some libraries were not found in the build output"
+            if [ -n "$fixed" ]; then
+              echo "::notice title=Added to recovery::$(echo "$fixed" | tr '\n' ';')"
+              rm -rf "$OUT"/vendor_boot.img "$OUT"/vendor_ramdisk*.img "$OUT"/obj/PACKAGING/vendor_boot_intermediates
+              mka vendorbootimage
+            fi
           } 2>&1 | tee "$OUT_DIR/build.log"
           cd "$OUT_DIR/target/product/rothko"
           sha256sum vendor_boot.img | tee vendor_boot.img.sha256

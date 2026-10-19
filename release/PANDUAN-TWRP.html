@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panduan TWRP Xiaomi 14T Pro (rothko)</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1b1f24; --muted:#5b6672;
+    --line:#e3e7ec; --accent:#1769aa; --accent-ink:#0d4f85;
+    --warn-bg:#fff4e5; --warn-line:#f0b429; --warn-ink:#7a4f00;
+    --danger-bg:#fdecec; --danger-line:#e0574f; --danger-ink:#9b2820;
+    --ok-bg:#e9f7ee; --ok-line:#38a169; --ok-ink:#1f6e43;
+  }
+  :root:not([data-theme="light"]) @media (prefers-color-scheme:dark){}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --bg:#15181c; --card:#1e2228; --ink:#e7ebf0; --muted:#9aa5b1;
+    --line:#2c323a; --accent:#5fa8dd; --accent-ink:#8fc3e8;
+    --warn-bg:#36291060; --warn-line:#c9971f; --warn-ink:#f0c86a;
+    --danger-bg:#3a1b1860; --danger-line:#d9574e; --danger-ink:#f0a79f;
+    --ok-bg:#16301f60; --ok-line:#45a86b; --ok-ink:#8fd6a7;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#15181c; --card:#1e2228; --ink:#e7ebf0; --muted:#9aa5b1;
+    --line:#2c323a; --accent:#5fa8dd; --accent-ink:#8fc3e8;
+    --warn-bg:#36291060; --warn-line:#c9971f; --warn-ink:#f0c86a;
+    --danger-bg:#3a1b1860; --danger-line:#d9574e; --danger-ink:#f0a79f;
+    --ok-bg:#16301f60; --ok-line:#45a86b; --ok-ink:#8fd6a7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-text-size-adjust:100%}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 72px}
+  header{text-align:center;padding:28px 16px 8px}
+  header .badge{display:inline-block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent-ink);background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:4px 14px;margin-bottom:14px}
+  h1{font-size:28px;margin:.2em 0 .1em;line-height:1.25}
+  header p{color:var(--muted);margin:.3em 0 0}
+  h2{font-size:21px;margin:34px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h2 .n{color:var(--accent);font-variant-numeric:tabular-nums}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;margin:14px 0}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:7px 0}
+  code,kbd{background:var(--bg);border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+  kbd{font-weight:600}
+  .keys{font-weight:600;color:var(--accent-ink);white-space:nowrap}
+  .box{border-radius:12px;padding:12px 16px;margin:14px 0;border-left:5px solid}
+  .warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn-ink)}
+  .danger{background:var(--danger-bg);border-color:var(--danger-line);color:var(--danger-ink)}
+  .ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok-ink)}
+  .box b{color:inherit}
+  .file{font-family:ui-monospace,monospace;font-weight:600;color:var(--accent-ink)}
+  .lead{color:var(--muted);font-size:15px}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;
+    padding-top:18px;border-top:1px solid var(--line)}
+  .toc{columns:2;column-gap:24px}
+  .toc a{color:var(--accent-ink);text-decoration:none;display:block;margin:5px 0;font-size:15px}
+  @media (max-width:520px){.toc{columns:1}}
+  @media print{body{background:#fff;color:#000}.card,.box{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge">TWRP Recovery</span>
+  <h1>Panduan TWRP<br>Xiaomi 14T Pro (rothko)</h1>
+  <p>Untuk HyperOS &middot; Dibuat ramah untuk semua orang &middot; oleh <b>Cogan17</b></p>
+</header>
+
+<div class="card">
+  <p class="lead">Buku ini memandu kamu langkah demi langkah: memasang TWRP, masuk ke TWRP,
+  membuka data, mencadangkan (backup), dan mengembalikan ke semula kalau ada masalah.
+  Tidak perlu jadi ahli — ikuti saja urutannya.</p>
+  <div class="toc">
+    <a href="#siap">1. Yang perlu disiapkan</a>
+    <a href="#pasang">2. Memasang TWRP</a>
+    <a href="#masuk">3. Masuk ke TWRP</a>
+    <a href="#buka">4. Membuka data (pola/sandi)</a>
+    <a href="#backup">5. Backup data &amp; init_boot</a>
+    <a href="#stok">6. Kembali ke stok</a>
+    <a href="#log">7. Ambil log kalau bermasalah</a>
+    <a href="#aman">8. Aturan penting</a>
+  </div>
+</div>
+
+<h2 id="siap"><span class="n">1.</span> Yang perlu disiapkan</h2>
+<div class="card">
+  <ul>
+    <li>Komputer <b>Windows</b> + kabel USB yang bagus.</li>
+    <li>Folder <b>platform-tools</b> (berisi <code>adb.exe</code> &amp; <code>fastboot.exe</code>).</li>
+    <li>Bootloader HP sudah <b>ter-unlock</b>.</li>
+    <li>Paket TWRP: ekstrak <b>semua</b> isinya ke dalam folder platform-tools (timpa yang lama).
+      Di dalamnya ada file gambar <span class="file">.img</span> dan beberapa file <span class="file">.bat</span>.</li>
+  </ul>
+  <div class="box warn">Baterai HP minimal <b>50%</b> sebelum mulai, biar aman.</div>
+</div>
+
+<h2 id="pasang"><span class="n">2.</span> Memasang TWRP</h2>
+<div class="card">
+  <ol>
+    <li>Matikan HP. Tahan <span class="keys">Power + Volume Bawah</span> sampai muncul tulisan <b>FASTBOOT</b>.</li>
+    <li>Sambungkan HP ke komputer dengan kabel.</li>
+    <li>Buka folder platform-tools, klik dua kali <span class="file">1-PASANG-TWRP.bat</span>.</li>
+    <li>Ikuti petunjuk di layar hitam. Tunggu sampai tertulis <b>BERHASIL</b> — HP akan menyala sendiri ke Android.</li>
+  </ol>
+  <div class="box ok">Kalau layar menampilkan "HP terdeteksi: rothko" lalu "BERHASIL", pemasangan sukses.</div>
+</div>
+
+<h2 id="masuk"><span class="n">3.</span> Masuk ke TWRP</h2>
+<div class="card">
+  <ol>
+    <li>Matikan HP sampai benar-benar mati.</li>
+    <li>Tahan <span class="keys">Volume Atas + Power</span> bersamaan.</li>
+    <li>Saat logo Mi muncul, <b>lepas tombol Power</b> tapi tahan terus Volume Atas sebentar, sampai TWRP terbuka.</li>
+  </ol>
+  <div class="box warn">Masuk TWRP harus dari kondisi <b>HP mati</b> + tombol, bukan lewat perintah "reboot recovery".</div>
+</div>
+
+<h2 id="buka"><span class="n">4.</span> Membuka data (pola / sandi)</h2>
+<div class="card">
+  <p>Saat masuk, TWRP minta membuka kunci data:</p>
+  <ul>
+    <li><b>Pengguna utama (0):</b> gambar <b>pola</b> yang sama seperti di layar kunci HP — <b>sekali saja, teliti</b>.
+      Kalau benar, semua data (Download, DCIM, dll) langsung terlihat.</li>
+    <li><b>XSpace / Ruang Kedua (999):</b> ini profil terpisah dengan <b>sandi sendiri</b>.
+      Masukkan sandinya kalau kamu memakainya; kalau tidak, <b>lewati saja</b> — data utama tetap terbuka.</li>
+  </ul>
+  <div class="box danger"><b>Jangan coba berkali-kali</b> kalau lupa. Salah berulang bisa mengunci sementara
+  (sistem keamanan). Cukup sekali kalau yakin.</div>
+</div>
+
+<h2 id="backup"><span class="n">5.</span> Backup data &amp; init_boot</h2>
+<div class="card">
+  <p><b>Cadangkan file pribadi (Download, DCIM, foto):</b></p>
+  <ul>
+    <li>Paling mudah: lewat Android biasa, colok kabel, pilih <b>Transfer File</b>, salin ke PC.</li>
+    <li>Lewat TWRP: menu <b>File Manager</b> &rarr; pilih folder &rarr; salin ke penyimpanan OTG.</li>
+  </ul>
+  <p><b>Cadangkan partisi penting (init_boot, boot, dll):</b></p>
+  <ol>
+    <li>Di TWRP, buka menu <b>Backup</b>.</li>
+    <li>Centang partisi yang mau dicadangkan (mis. <b>Boot</b>, <b>Init_boot</b>, <b>Super</b>).</li>
+    <li>Geser untuk memulai. Hasilnya tersimpan di folder <code>TWRP/BACKUPS</code>.</li>
+  </ol>
+  <div class="box ok">Simpan hasil backup ke PC/flashdisk juga, biar aman kalau HP bermasalah.</div>
+</div>
+
+<h2 id="stok"><span class="n">6.</span> Kembali ke stok (kalau mau batal)</h2>
+<div class="card">
+  <p>Mau menghapus TWRP dan kembali seperti semula? <b>Data tidak akan dihapus.</b></p>
+  <ol>
+    <li>Masuk mode FASTBOOT: dari HP mati, tahan <span class="keys">Power + Volume Bawah</span>.</li>
+    <li>Colok kabel, lalu jalankan <span class="file">2-KEMBALIKAN-STOK.bat</span>.</li>
+    <li>Tunggu sampai <b>BERHASIL</b>. HP menyala ulang ke HyperOS normal.</li>
+  </ol>
+  <div class="box warn">Kalau HP sempat <b>bootloop</b> (muter di logo Mi), ini cara memperbaikinya:
+  paksa mati (tahan Power ~15 detik), masuk FASTBOOT, jalankan <span class="file">2-KEMBALIKAN-STOK.bat</span>.</div>
+</div>
+
+<h2 id="log"><span class="n">7.</span> Ambil log kalau butuh bantuan</h2>
+<div class="card">
+  <ul>
+    <li><b>TWRP jalan tapi ada masalah</b> (sentuh, dekripsi, dll): jalankan <span class="file">3-AMBIL-LOG.bat</span>.</li>
+    <li><b>HP bootloop / tidak mau boot</b>: masuk TWRP langsung dari bootloop
+      (<span class="keys">Volume Atas + Power</span>, jangan matikan paksa), lalu jalankan
+      <span class="file">4-LOG-BOOTLOOP.bat</span>.</li>
+  </ul>
+  <p>File log tersimpan di folder <code>Downloads</code> di PC. Kirim isinya ke pembuat TWRP —
+  terutama <code>recovery.log</code> atau <code>console-ramoops-0</code>.</p>
+</div>
+
+<h2 id="aman"><span class="n">8.</span> Aturan penting (baca ini!)</h2>
+<div class="card">
+  <div class="box danger"><b>JANGAN pilih "Format Data" atau "Wipe"</b> sembarangan —
+  itu menghapus SEMUA foto &amp; data. Hanya lakukan kalau kamu benar-benar mau menghapus total.</div>
+  <ul>
+    <li>Selalu <b>backup data penting</b> sebelum bereksperimen.</li>
+    <li>Pasang hanya file TWRP untuk <b>rothko (14T Pro)</b> — jangan dari HP lain.</li>
+    <li>Kalau modul KernelSU mati setelah bootloop, itu pengaman otomatis — nyalakan lagi
+      di aplikasi KernelSU &rarr; Modul &rarr; reboot.</li>
+  </ul>
+</div>
+
+<footer>
+  TWRP untuk Xiaomi 14T Pro (rothko) &middot; Maintainer: <b>Cogan17</b><br>
+  Pohon perangkat asli oleh JonesqPacMan &middot; TeamWin Recovery Project<br>
+  Panduan ini bisa dibuka offline dan di-print (Ctrl&nbsp;+&nbsp;P) jadi PDF.
+</footer>
+
+</div>
+</body>
+</html>
