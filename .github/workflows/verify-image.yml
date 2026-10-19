@@ -78,6 +78,15 @@ jobs:
             done
           done
 
+      - name: Normal-boot files and size breakdown
+        run: |
+          lst() { (cd "$1" && find . -type f -o -type l | sed 's|^\./||' | sort); }
+          echo "::notice title=stock first_stage_ramdisk::$(lst frag-stock-vendor_ramdisk00/first_stage_ramdisk | tr '\n' ' ')"
+          echo "::notice title=twrp first_stage_ramdisk::$(lst frag-twrp-vendor_ramdisk00/first_stage_ramdisk | tr '\n' ' ')"
+          echo "::notice title=In stock platform fragment, missing from TWRP::$(comm -23 <(lst frag-stock-vendor_ramdisk00) <(lst frag-twrp-vendor_ramdisk00) | head -150 | tr '\n' ' ')"
+          echo "::notice title=TWRP ramdisk biggest dirs (uncompressed KB)::$(du -k --max-depth=3 frag-twrp-vendor_ramdisk00 | sort -rn | sed -n '2,40p' | sed 's|frag-twrp-vendor_ramdisk00/||' | tr '\t\n' ' ;')"
+          echo "::notice title=TWRP ramdisk biggest files (KB)::$(find frag-twrp-vendor_ramdisk00 -type f -printf '%k %P\n' | sort -rn | head -40 | tr '\n' ';')"
+
       - name: Compare
         run: |
           hdr() { grep -iE 'header version|page size|address|command line|dtb size|ramdisk total size|vendor_ramdisk0' "$1" | tr '\n' ';'; }
