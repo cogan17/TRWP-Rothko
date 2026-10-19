@@ -1,0 +1,34 @@
+TWRP untuk Xiaomi 14T Pro (rothko)
+Firmware: @VERSION@
+==================================================
+
+ISI PAKET
+  1-PASANG-TWRP.bat       : memasang TWRP
+  2-KEMBALIKAN-STOK.bat   : mengembalikan HP seperti semula (kalau ada masalah)
+  @TWRP_IMG@
+  @STOCK_IMG@
+  Jangan mengganti nama file .img di atas.
+
+SYARAT
+  - Bootloader HP sudah di-unlock.
+  - HP memakai firmware @VERSION@
+    (cek di Setelan > Tentang ponsel > Versi HyperOS).
+  - Komputer Windows dengan Android platform-tools (fastboot).
+
+CARA MEMASANG
+  1. Salin SEMUA file paket ini ke folder platform-tools
+     (folder yang berisi fastboot.exe).
+  2. Klik dua kali 1-PASANG-TWRP.bat, lalu ikuti petunjuk di layar.
+
+  Skrip memeriksa file dan HP secara otomatis. Kalau ada yang tidak cocok,
+  proses dibatalkan sebelum HP diubah.
+
+KALAU HP BOOTLOOP ATAU ADA MASALAH
+  1. Matikan HP (tahan Power 10-15 detik).
+  2. Tahan Power + Volume Bawah sampai muncul FASTBOOT, sambungkan kabel.
+  3. Klik dua kali 2-KEMBALIKAN-STOK.bat.
+  Data di HP tidak hilang.
+
+JANGAN
+  - Jangan pilih Format Data atau Wipe di TWRP (data akan hilang).
+  - Jangan memakai paket ini untuk firmware selain @VERSION@.
