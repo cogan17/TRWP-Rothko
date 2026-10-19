@@ -89,7 +89,8 @@ jobs:
             source build/envsetup.sh
             # 14.1 lunch requires <product>-<release>-<variant>
             lunch twrp_rothko-ap2a-eng || lunch twrp_rothko-trunk_staging-eng
-            mka vendorbootimage
+            # -k: keep going past the first failure so one run reports every broken file
+            mka vendorbootimage -k
           } 2>&1 | tee "$OUT_DIR/build.log"
           cd "$OUT_DIR/target/product/rothko"
           sha256sum vendor_boot.img | tee vendor_boot.img.sha256
@@ -107,6 +108,8 @@ jobs:
           # link failures: every missing symbol, not only the tail that fits above
           u=$(grep -o 'undefined symbol: [^ ]*' "$f" | cut -d' ' -f3 | sort -u | c++filt | head -80 | tr '\n' ';' || true)
           [ -z "$u" ] || echo "::error title=Undefined symbols::$u"
+          e=$(sed 's/\x1b\[[0-9;]*m//g' "$f" | grep -E ': (fatal )?error: ' | sort -u | head -40 | sed -e 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' || true)
+          [ -z "$e" ] || echo "::error title=All compile errors::$e"
           echo "::notice title=Disk at failure::$(df -h --output=target,avail / /mnt | tail -n +2 | tr -s ' ' | tr '\n' ' ')"
 
       - uses: actions/upload-artifact@v4
