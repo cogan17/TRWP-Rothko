@@ -28,6 +28,8 @@ call adb shell logcat -d > "%OUT%\logcat.txt" 2>&1
 call adb shell getprop > "%OUT%\getprop.txt" 2>&1
 call adb shell ps -A > "%OUT%\ps.txt" 2>&1
 call adb shell find / -xdev > "%OUT%\files.txt" 2>&1
+call adb shell cat /proc/bus/input/devices > "%OUT%\input.txt" 2>&1
+call adb shell "ls -la /sys/bus/spi/devices/*/ /proc/fts* /sys/class/touch/*/" > "%OUT%\touch.txt" 2>&1
 set "SZ=0"
 for %%f in ("%OUT%\dmesg.txt") do set "SZ=%%~zf"
 if %SZ% LSS 1000 goto gagal_ambil
