@@ -31,13 +31,20 @@ jobs:
           r=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
           m=$(df -BG --output=avail /mnt | tail -1 | tr -dc 0-9)
           echo "::notice title=Disk after cleanup::/ ${r}G free, /mnt ${m}G free"
-          # source (~50 GB) on the larger disk, out/ and swap on the other
-          if [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
+          # source (~50 GB) on one disk, out/, ccache and swap on the other. Both disks normally have
+          # ~120 GB, so keep source on /mnt unless it is short: ccache only hits when paths stay the same
+          if [ "$m" -ge 100 ] || [ "$m" -ge "$r" ]; then src=/mnt/twrp; out=/out; swap=/swapfile
           else src=/twrp; out=/mnt/out; swap=/mnt/swapfile; fi
-          sudo mkdir -p "$src" "$out" && sudo chown "$USER" "$src" "$out"
+          ccache_dir=${out%/out}/ccache
+          sudo mkdir -p "$src" "$out" "$ccache_dir" && sudo chown "$USER" "$src" "$out" "$ccache_dir"
           sudo fallocate -l 16G "$swap" && sudo chmod 600 "$swap" && sudo mkswap "$swap" && sudo swapon "$swap"
           echo "SRC=$src" >> "$GITHUB_ENV"
           echo "OUT_DIR=$out" >> "$GITHUB_ENV"
+          # build/make/core/ccache.mk turns these into CC_WRAPPER for Make and Soong; the rest are
+          # the settings it recommends, passed to ninja's environment
+          { echo USE_CCACHE=1; echo CCACHE_EXEC=/usr/bin/ccache; echo "CCACHE_DIR=$ccache_dir"
+            echo CCACHE_COMPILERCHECK=content; echo CCACHE_SLOPPINESS=time_macros,include_file_mtime,file_macro
+            echo CCACHE_BASEDIR=/; } >> "$GITHUB_ENV"
           # sync and build join this cgroup, so the runner agent always keeps RAM
           # and an OOM kills only our processes
           sudo mkdir /sys/fs/cgroup/build
@@ -50,7 +57,9 @@ jobs:
           # runner apt mirrors flake now and then
           for i in 1 2 3; do sudo apt-get -o Acquire::Retries=3 update && break; sleep 15; done
           sudo apt-get -o Acquire::Retries=3 install -y bc bison build-essential curl flex git gnupg gperf libssl-dev \
-            libxml2-utils lz4 python-is-python3 rsync unzip xsltproc zip zlib1g-dev zstd
+            libxml2-utils lz4 python-is-python3 rsync unzip xsltproc zip zlib1g-dev zstd ccache
+          # the repo-wide Actions cache is 10 GB; leave room for two generations
+          ccache -M 4G
           mkdir -p ~/bin
           curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
           chmod +x ~/bin/repo
@@ -77,6 +86,13 @@ jobs:
         with:
           path: device-tree
 
+      # compiler cache from the previous successful build: only changed files are compiled again
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ github.run_id }}
+          restore-keys: ccache-
+
       - name: Build vendor_boot.img
         run: |
           echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs >/dev/null
@@ -88,6 +104,7 @@ jobs:
             t=$(basename "$d"); t=${t//_//}
             for p in "$d"*.patch; do git -C "$t" apply "$SRC/$p"; done
           done
+          ccache -z >/dev/null
           {
             export ALLOW_MISSING_DEPENDENCIES=true
             source build/envsetup.sh
@@ -110,6 +127,7 @@ jobs:
           cd "$OUT_DIR/target/product/rothko"
           sha256sum vendor_boot.img | tee vendor_boot.img.sha256
           echo "::notice title=vendor_boot.img::$(stat -c%s vendor_boot.img) bytes, sha256 $(cut -d' ' -f1 vendor_boot.img.sha256)"
+          echo "::notice title=ccache::$(ccache -s | tr -s ' ' | tr '\n' ';')"
 
       # Surface the compiler error as an annotation so it is readable without downloading logs
       - name: Report build error
