@@ -56,6 +56,8 @@ on post-fs-data
 
 on boot
     start mtk.plpath.utils.link
+    # Focaltech starts in THP mode: raw frames for a touch HAL only Android has. Report touches directly
+    write /sys/class/touch/touch_dev/enable_touch_raw 0
     setprop sys.usb.config adb
 
 on property:twrp.modules.loaded=true
