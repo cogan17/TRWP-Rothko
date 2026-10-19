@@ -1,0 +1,53 @@
+Stub the FDE cryptfs functions that vold 14.1 no longer provides.
+
+Run 39179952900 failed compiling partitionmanager.cpp:
+  use of undeclared identifier 'cryptfs_get_password_type'
+  use of undeclared identifier 'cryptfs_check_passwd'
+partition.cpp calls set_partition_data/cryptfs_check_footer on the same
+kind of FDE fallback path. vold 14.1 (like AOSP since Android 13) has no
+FDE, so cryptfs.h only declares the ext-volume helpers. This adds
+twrp_fde_compat.h with stubs that fail, included next to cryptfs.h.
+FBE devices with a keydirectory, such as rothko, never take these paths.
+Applies after 0002.
+
+diff --git a/partition.cpp b/partition.cpp
+index 8c53567e..ef45ea39 100755
+--- a/partition.cpp
++++ b/partition.cpp
+@@ -52,6 +52,7 @@
+ #ifdef TW_INCLUDE_CRYPTO
+ 	// #include "crypto/fde/cryptfs.h"
+ 	#include "cryptfs.h"
++	#include "twrp_fde_compat.h"
+ 	#include "Decrypt.h"
+ #endif
+ extern "C" {
+diff --git a/partitionmanager.cpp b/partitionmanager.cpp
+index 171feccf..e872f47b 100755
+--- a/partitionmanager.cpp
++++ b/partitionmanager.cpp
+@@ -105,6 +105,7 @@ extern "C" {
+ #ifdef TW_INCLUDE_FBE_METADATA_DECRYPT
+ 	#ifdef USE_FSCRYPT
+ 	#include "cryptfs.h"
++	#include "twrp_fde_compat.h"
+ 	#include "fscrypt-common.h"
+ 	#include "MetadataCrypt.h"
+ 	#endif
+diff --git a/twrp_fde_compat.h b/twrp_fde_compat.h
+new file mode 100644
+index 00000000..351b96ba
+--- /dev/null
++++ b/twrp_fde_compat.h
+@@ -0,0 +1,11 @@
++/*
++ * vold 14.1, like AOSP since Android 13, has no FDE, so its cryptfs.h no
++ * longer declares these. TWRP 14.1 still calls them on its FDE fallback
++ * paths; FBE devices never take those paths, so they just fail cleanly.
++ */
++#pragma once
++
++static inline void set_partition_data(const char*, const char*) {}
++static inline int cryptfs_check_footer() { return -1; }
++static inline int cryptfs_get_password_type() { return -1; }
++static inline int cryptfs_check_passwd(const char*) { return -1; }

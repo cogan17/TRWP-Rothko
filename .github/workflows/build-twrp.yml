@@ -105,7 +105,7 @@ jobs:
           msg=$(tail -c 3500 "$f" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | sed ':a;N;$!ba;s/\n/%0A/g')
           echo "::error title=Build error::$msg"
           # link failures: every missing symbol, not only the tail that fits above
-          u=$(grep -o 'undefined symbol: [^ ]*' "$f" | cut -d' ' -f3 | sort -u | c++filt | head -80 | tr '\n' ';')
+          u=$(grep -o 'undefined symbol: [^ ]*' "$f" | cut -d' ' -f3 | sort -u | c++filt | head -80 | tr '\n' ';' || true)
           [ -z "$u" ] || echo "::error title=Undefined symbols::$u"
           echo "::notice title=Disk at failure::$(df -h --output=target,avail / /mnt | tail -n +2 | tr -s ' ' | tr '\n' ' ')"
 
