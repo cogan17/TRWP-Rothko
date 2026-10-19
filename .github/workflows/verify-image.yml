@@ -78,6 +78,17 @@ jobs:
             done
           done
 
+      - name: Full headers and bootconfig
+        run: |
+          for n in twrp stock; do
+            echo "::notice title=$n full header::$(grep -vE '^ +board_id|^ +0x' $n.txt | tr -s ' ' | tr '\n' ';')"
+            if [ -s u-$n/bootconfig ]; then
+              echo "::notice title=$n bootconfig::$(tr '\n' ';' < u-$n/bootconfig)"
+            else
+              echo "::notice title=$n bootconfig::(none)"
+            fi
+          done
+
       - name: Normal-boot files and size breakdown
         run: |
           lst() { (cd "$1" && find . -type f -o -type l | sed 's|^\./||' | sort); }
