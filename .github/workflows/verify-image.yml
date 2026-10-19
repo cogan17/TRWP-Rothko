@@ -61,6 +61,23 @@ jobs:
             done
           done
 
+      # TWRP bootlooped while stock has two fragments (TWRP one): show what each fragment holds
+      - name: Per-fragment layout
+        run: |
+          for n in twrp stock; do
+            echo "::notice title=$n ramdisk table::$(grep -E 'vendor_ramdisk[0-9]|^ +(size|offset|type|name):' $n.txt | tr -s ' ' | tr '\n' ';')"
+            for f in u-$n/vendor_ramdisk*; do
+              d=frag-$n-$(basename "$f"); mkdir -p "$d"
+              case "$(head -c4 "$f" | od -An -tx1 | tr -d ' ')" in
+                02214c18) lz4 -dc "$f" ;;
+                1f8b*) gzip -dc "$f" ;;
+                *) cat "$f" ;;
+              esac | (cd "$d" && cpio -idm --quiet --no-absolute-filenames)
+              has() { [ -e "$d/$1" ] && echo y || echo n; }
+              echo "::notice title=$n $(basename "$f")::$(stat -c%s "$f") bytes, $(find "$d" -type f | wc -l) files; system/bin/recovery=$(has system/bin/recovery) twres=$(has twres) init.recovery.mt6989.rc=$(has init.recovery.mt6989.rc) first_stage_ramdisk/fstab=$(has first_stage_ramdisk/fstab.mt6989) modules.load=$(has lib/modules/modules.load) modules.load.recovery=$(has lib/modules/modules.load.recovery) ko=$(ls "$d"/lib/modules 2>/dev/null | grep -c '\.ko$' || true); top: $(ls "$d" | tr '\n' ' ')"
+            done
+          done
+
       - name: Compare
         run: |
           hdr() { grep -iE 'header version|page size|address|command line|dtb size|ramdisk total size|vendor_ramdisk0' "$1" | tr '\n' ';'; }
