@@ -27,7 +27,7 @@ env:
 jobs:
   extract:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 180
     defaults:
       run:
         shell: bash
@@ -39,7 +39,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for i in 1 2 3; do sudo apt-get -o Acquire::Retries=3 update && break; sleep 15; done
-          sudo apt-get -o Acquire::Retries=3 install -y erofs-utils lz4 cpio
+          sudo apt-get -o Acquire::Retries=3 install -y aria2 erofs-utils lz4 cpio
           gh release download -R ssut/payload-dumper-go -p '*linux_amd64.tar.gz' -O pdg.tgz
           mkdir -p ~/tools && tar -xzf pdg.tgz -C ~/tools && rm pdg.tgz
           git clone -q --depth 1 https://android.googlesource.com/platform/system/tools/mkbootimg ~/tools/mkbootimg
@@ -47,7 +47,10 @@ jobs:
       - name: Download ROM and verify it is the phone's firmware
         run: |
           mkdir -p $RUNNER_TEMP/work && cd $RUNNER_TEMP/work
-          curl -fL --retry 3 -o rom.zip "$ROM_URL"
+          # one CDN alone took >75 min for 6.3 GB; pull segments from all official mirrors in parallel
+          path=${ROM_URL#https://*/}
+          aria2c -q -x16 -s16 -k4M --max-tries=5 --retry-wait=10 --file-allocation=none -o rom.zip "$ROM_URL" \
+            "https://cdnorg.d.miui.com/$path" "https://bkt-sgp-miui-ota-update-alisgp.oss-ap-southeast-1.aliyuncs.com/$path"
           echo "$ROM_MD5  rom.zip" | md5sum -c -
           unzip -q rom.zip payload.bin && rm rom.zip
           ~/tools/payload-dumper-go -p boot,init_boot,vendor_boot,vendor -o img payload.bin
