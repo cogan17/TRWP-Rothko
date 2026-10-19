@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <b>🇮🇩 Bahasa Indonesia</b> &nbsp;·&nbsp; <a href="README.en.md">🇬🇧 English</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/cogan17/TRWP-Rothko/actions/workflows/verify-image.yml"><b>⬇️ Unduh Paket</b></a>
   &nbsp;·&nbsp;
   <a href="docs/pasang.md"><b>📖 Panduan</b></a>
