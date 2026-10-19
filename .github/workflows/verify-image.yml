@@ -136,6 +136,7 @@ jobs:
           check "dtb identical to stock" 'cmp -s u-twrp/dtb u-stock/dtb'
           check "TWRP UI in recovery fragment (twres/, system/bin/recovery)" '[ -d frag-twrp-vendor_ramdisk01/twres ] && [ -e frag-twrp-vendor_ramdisk01/system/bin/recovery ]'
           check "twrp.flags present" '[ -f r-twrp/system/etc/twrp.flags ]'
+          check "every program in TWRP finds its libraries and linker" 'o=$(python3 repo/.github/scripts/recovery_deps.py r-twrp) && [ -z "$o" ]'
           # Android's normal boot reads these from the platform fragment, so they must equal stock
           check "first-stage fstab matches stock" 'cmp -s frag-twrp-vendor_ramdisk00/first_stage_ramdisk/fstab.mt6989 frag-stock-vendor_ramdisk00/first_stage_ramdisk/fstab.mt6989'
           d=$(diff -rq frag-twrp-vendor_ramdisk00/lib/modules frag-stock-vendor_ramdisk00/lib/modules || true)

@@ -95,6 +95,17 @@ jobs:
             lunch twrp_rothko-ap2a-eng || lunch twrp_rothko-trunk_staging-eng
             # -k: keep going past the first failure so one run reports every broken file
             mka vendorbootimage -k
+            # TWRP's relink lists lag behind vold (keystore2-V1 vs V4, ...) and copy the bootstrap
+            # servicemanager: fill the gaps in recovery/root, then repack if anything changed
+            # not fatal here: the verify workflow's gate decides, and it reruns in minutes, not hours
+            fixed=$(python3 device/xiaomi/rothko/.github/scripts/recovery_deps.py "$OUT/recovery/root" \
+              "$OUT/system/lib64" "$OUT/system_ext/lib64" "$OUT/vendor/lib64" "$OUT_DIR/soong/.intermediates") ||
+              echo "::warning title=Recovery deps::some libraries were not found in the build output"
+            if [ -n "$fixed" ]; then
+              echo "::notice title=Added to recovery::$(echo "$fixed" | tr '\n' ';')"
+              rm -rf "$OUT"/vendor_boot.img "$OUT"/vendor_ramdisk*.img "$OUT"/obj/PACKAGING/vendor_boot_intermediates
+              mka vendorbootimage
+            fi
           } 2>&1 | tee "$OUT_DIR/build.log"
           cd "$OUT_DIR/target/product/rothko"
           sha256sum vendor_boot.img | tee vendor_boot.img.sha256
