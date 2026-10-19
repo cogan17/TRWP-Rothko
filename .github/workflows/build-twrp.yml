@@ -67,11 +67,23 @@ jobs:
           git config --global user.name github-actions
           git config --global user.email github-actions@users.noreply.github.com
 
+      - uses: actions/checkout@v4
+        with:
+          path: device-tree
+
       - name: Sync TWRP 14.1 minimal manifest
         run: |
           echo $$ | sudo tee /sys/fs/cgroup/build/cgroup.procs >/dev/null
           cd "$SRC"
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14.1
+          # TeamWin/LineageOS forks follow branches; the lock pins them (Update TWRP sources workflow)
+          lock="$GITHUB_WORKSPACE/device-tree/.github/twrp-sources.lock.xml"
+          if [ -f "$lock" ]; then
+            mkdir -p .repo/local_manifests && cp "$lock" .repo/local_manifests/
+            echo "::notice title=TWRP sources::pinned by twrp-sources.lock.xml ($(grep -c '<extend-project' "$lock") projects)"
+          else
+            echo "::warning title=TWRP sources::no lock, using the latest commits of every branch"
+          fi
           repo sync -c -j"$(nproc --all)" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
           # reference ABI dumps only feed optional ABI checks (skipped when missing); frees ~5.6G for swap
           rm -rf prebuilts/abi-dumps
@@ -81,10 +93,6 @@ jobs:
             -e 's/android\.system\.keystore2-V1-ndk_platform/android.system.keystore2-V4-ndk/g' \
             -e 's/-ndk_platform/-ndk/g'
           echo "::notice title=Disk after sync::$(df -h --output=avail / | tail -1) free; biggest: $(du -sh .repo prebuilts/* external/* 2>/dev/null | sort -h | tail -6 | tr '\t\n' ' ;')"
-
-      - uses: actions/checkout@v4
-        with:
-          path: device-tree
 
       # compiler cache from the previous successful build: only changed files are compiled again
       - uses: actions/cache@v4

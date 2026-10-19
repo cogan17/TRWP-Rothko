@@ -116,6 +116,10 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@users.noreply.github.com
+          printf '%s\n' '# Firmware the device tree blobs (dtb, vendor_boot modules, vendor files) come from.' \
+            '# Written by the "Extract stock blobs" workflow; STOCK_RUN is that run, whose stock-images' \
+            '# artifact (stock vendor_boot) the packaging workflow compares against and ships.' \
+            "VERSION=$VERSION" "STOCK_RUN=$GITHUB_RUN_ID" > .github/firmware.env
           git add -A
           git commit -q -m "rothko: update stock blobs to $VERSION" -m "dtb, vendor_boot modules, first-stage fstab and vendor blobs extracted from $ROM_URL (md5 $ROM_MD5, boot.img sha256 $BOOT_SHA256)."
           git push -f origin "HEAD:refs/heads/stock/$VERSION"

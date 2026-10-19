@@ -1,0 +1,66 @@
+name: Update TWRP sources
+
+# The TWRP 14.1 manifest keeps AOSP on a release tag, but its TeamWin/LineageOS forks follow
+# branches. .github/twrp-sources.lock.xml pins those to commits, so a build only picks up new
+# TWRP code when this workflow updates the lock.
+#   check  : report pinned vs latest commits (no changes)
+#   update : write the latest commits into the lock on this branch and start a build
+on:
+  workflow_dispatch:
+    inputs:
+      MODE:
+        description: "check = laporan saja / report only; update = kunci versi terbaru lalu build"
+        type: choice
+        default: check
+        options: [check, update]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-twrp-sources
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: ${{ inputs.MODE == 'update' }}
+
+      - name: Compare the lock with the latest commits
+        run: |
+          mkdir -p ~/bin "$RUNNER_TEMP/src"
+          curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo && chmod +x ~/bin/repo
+          cd "$RUNNER_TEMP/src"
+          # fetches only the manifest repository, no source
+          ~/bin/repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14.1
+          ~/bin/repo manifest -o merged.xml
+          python3 "$GITHUB_WORKSPACE/.github/scripts/twrp_sources_lock.py" merged.xml "$RUNNER_TEMP/lock.xml" \
+            "$GITHUB_WORKSPACE/.github/twrp-sources.lock.xml" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply the new lock and start a build
+        if: inputs.MODE == 'update'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp "$RUNNER_TEMP/lock.xml" .github/twrp-sources.lock.xml
+          git add .github/twrp-sources.lock.xml
+          if git diff --cached --quiet; then
+            echo "The lock is already up to date; no build started." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "chore: update TWRP sources lock" -m "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          git push -q origin "HEAD:$GITHUB_REF_NAME"
+          # a push made with GITHUB_TOKEN does not start workflows, a dispatch does
+          gh workflow run build-twrp.yml --ref "$GITHUB_REF_NAME"
+          echo "**Lock updated on $GITHUB_REF_NAME and a build started.**" | tee -a "$GITHUB_STEP_SUMMARY"

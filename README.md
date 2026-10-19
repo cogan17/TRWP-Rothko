@@ -75,6 +75,22 @@
 
 ---
 
+## 🔧 Perawatan
+
+Semua lewat tab **Actions** di GitHub. Paket siap pakai selalu keluar dari **Verify TWRP image**.
+
+| Kebutuhan | Langkah | Waktu |
+|---|---|---|
+| Ubah pengaturan, skrip atau file vendor di `recovery/root` | **Verify TWRP image**, isi `twrp_run_id` dengan run **Build TWRP** terakhir | ±3 menit |
+| Versi TWRP baru | **Update TWRP sources**: `check` untuk melihat perubahan, `update` untuk mengunci versi baru (build berjalan otomatis) | ±1 jam, lebih cepat setelah cache terisi |
+| Update HyperOS | **Extract stock blobs** (versi, link ROM, md5, sha256 `boot.img` dari HP), gabungkan cabang `stock/<versi>`, lalu **Verify TWRP image** dengan build terakhir | ±20 menit + 3 menit |
+| Ubah kode, `BoardConfig.mk` atau `device.mk` | **Build TWRP** | ±1 jam |
+
+Update HyperOS menimpa `vendor_boot`, jadi TWRP perlu dipasang lagi dengan paket untuk versi baru.
+Kode TWRP dikunci di `.github/twrp-sources.lock.xml`; versi firmware tercatat di `.github/firmware.env`.
+
+---
+
 ## 👤 Maintainer
 
 - [cogan17](https://github.com/cogan17)
