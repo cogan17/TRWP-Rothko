@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       twrp_run_id:
-        description: 'Run id of the "Build TWRP" run'
+        description: 'Run id of the "Build TWRP" run (recovery/root of this commit is applied on top)'
       stock_run_id:
         description: 'Run id of the "Extract stock blobs" run'
 
@@ -63,10 +63,13 @@ jobs:
           python3 ~/mkbootimg/unpack_bootimg.py --boot_img twrp/vendor_boot.img --out u-orig --format=mkbootimg -0 > orig.args
           [ "$(ls u-orig | grep vendor_ramdisk)" = vendor_ramdisk00 ]
           zstd -dc u-orig/vendor_ramdisk00 > all.cpio
+          # Fast path: the build copies recovery/root verbatim, so overlaying this commit's copy gives
+          # the same result for ramdisk-only changes (rc, scripts, blobs) without a 2-hour rebuild.
+          # shortcut: files deleted from recovery/root stay in the image; rebuild after deleting any
           python3 - <<'EOF'
+          import os
           d = open('all.cpio', 'rb').read()
-          out = {'platform': bytearray(), 'recovery': bytearray()}
-          pos = 0
+          entries, pos = {}, 0  # name -> raw newc entry, in archive order
           while True:
               h = d[pos:pos + 110]
               assert h[:6] == b'070701', pos  # newc, as written by mkbootfs
@@ -75,11 +78,45 @@ jobs:
               end = pos + ((110 + namesize + 3) & ~3) + ((filesize + 3) & ~3)
               if name == 'TRAILER!!!':
                   break
-              out['platform' if name.split('/')[0] in ('lib', 'first_stage_ramdisk') else 'recovery'] += d[pos:end]
+              entries[name] = d[pos:end]
               pos = end
           assert not d[end:].strip(b'\0')
+          trailer = d[pos:end]
+          field = lambda raw, i: int(raw[6 + 8 * i:14 + 8 * i], 16)  # 0 ino 1 mode 6 filesize 11 namesize
+          data_of = lambda raw: raw[(110 + field(raw, 11) + 3) & ~3:][:field(raw, 6)]
+          ino = max(field(r, 0) for r in entries.values())
+
+          def entry(name, mode, data, like):
+              global ino
+              # a replaced file keeps the build's mode/owner (fs_config); a new one gets root and git's mode
+              f = [field(like, i) for i in range(13)] if like else [ino := ino + 1, mode, 0, 0, 1 + (mode >> 12 == 4), 0, 0, 0, 0, 0, 0, 0, 0]
+              f[6], f[11] = len(data), len(name) + 1
+              h = b'070701' + b''.join(b'%08X' % v for v in f) + name.encode() + b'\0'
+              return h + b'\0' * (-len(h) % 4) + data + b'\0' * (-len(data) % 4)
+
+          root, changed = 'repo/recovery/root', []
+          for dp, dns, fns in os.walk(root):
+              dns.sort()
+              for n in dns + sorted(fns):
+                  p = os.path.join(dp, n)
+                  rel, link = os.path.relpath(p, root), os.path.islink(p)
+                  if os.path.isdir(p) and not link:
+                      if rel not in entries:
+                          entries[rel] = entry(rel, 0o40755, b'', None)
+                      continue
+                  data = os.readlink(p).encode() if link else open(p, 'rb').read()
+                  old = entries.get(rel)
+                  if old is None or data_of(old) != data:
+                      mode = 0o120777 if link else 0o100755 if os.access(p, os.X_OK) else 0o100644
+                      entries[rel] = entry(rel, mode, data, old)
+                      changed.append(rel)
+          if changed:
+              print('::notice title=Updated from recovery/root::' + ';'.join(changed))
+          out = {'platform': bytearray(), 'recovery': bytearray()}
+          for name, raw in entries.items():
+              out['platform' if name.split('/')[0] in ('lib', 'first_stage_ramdisk') else 'recovery'] += raw
           for k, o in out.items():
-              open(k + '.cpio', 'wb').write(o + d[pos:end])
+              open(k + '.cpio', 'wb').write(o + trailer)
           EOF
           for f in platform recovery; do zstd -19 -T0 -q -c $f.cpio > $f.cpio.zst; done
           mapfile -d '' a < orig.args
