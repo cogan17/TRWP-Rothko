@@ -9,7 +9,6 @@ mtk_sync.ko
 mtk_disp_notify.ko
 zsmalloc.ko
 zram.ko
-mi_mem_engine.ko
 log_store.ko
 mtk_printk_ctrl.ko
 nvmem_mtk-devinfo.ko
@@ -144,6 +143,7 @@ pidmap.ko
 mtk-pmic-keys.ko
 mtk-kpd.ko
 i2c-mt65xx.ko
+mtk_dramc.ko
 spi-mt65xx.ko
 tui-common.ko
 xiaomi_touch_common.ko

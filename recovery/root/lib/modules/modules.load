@@ -140,6 +140,7 @@ pidmap.ko
 mtk-pmic-keys.ko
 mtk-kpd.ko
 i2c-mt65xx.ko
+mtk_dramc.ko
 spi-mt65xx.ko
 tui-common.ko
 mt6375.ko
