@@ -28,14 +28,19 @@ echo  Memasang TWRP, jangan cabut kabel...
 call fastboot flash vendor_boot "%IMG%"
 if errorlevel 1 goto gagal_flash
 echo.
-echo  BERHASIL. HP sekarang masuk ke TWRP.
+echo  BERHASIL. HP sekarang menyala ke Android dulu, tunggu sampai selesai.
+echo.
+echo  Cara masuk TWRP:
+echo   1. Matikan HP.
+echo   2. Tahan tombol Power + Volume Atas sampai logo Mi muncul, lalu lepas.
 echo.
 echo  PENTING untuk percobaan pertama:
 echo   - Kalau TWRP minta PIN atau pola, tekan CANCEL dulu.
 echo   - Coba sentuh layar. Kalau berfungsi, pilih Reboot lalu System.
-echo   - Pastikan Android menyala normal.
-echo  Kalau HP tidak masuk TWRP: matikan HP, lalu tahan Power + Volume Atas.
-call fastboot reboot recovery >nul 2>&1
+echo   - Kalau TWRP tidak terbuka, HP akan menyala ulang. Itu aman,
+echo     data tidak hilang. Biarkan HP masuk ke Android.
+rem Normal boot, not "reboot recovery": that writes boot-recovery to misc, so a TWRP that crashes would bootloop
+call fastboot reboot >nul 2>&1
 echo.
 pause
 exit /b 0

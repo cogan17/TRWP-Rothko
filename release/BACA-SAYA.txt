@@ -19,6 +19,7 @@ CARA MEMASANG
   1. Salin SEMUA file paket ini ke folder platform-tools
      (folder yang berisi fastboot.exe).
   2. Klik dua kali 1-PASANG-TWRP.bat, lalu ikuti petunjuk di layar.
+  3. Untuk masuk TWRP: matikan HP, lalu tahan Power + Volume Atas.
 
   Skrip memeriksa file dan HP secara otomatis. Kalau ada yang tidak cocok,
   proses dibatalkan sebelum HP diubah.
