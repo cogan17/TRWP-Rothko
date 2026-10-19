@@ -72,3 +72,14 @@
 - [x] USB OTG
 - [x] Vibrator
 - [x] Miscellaneous
+
+---
+
+## 👤 Maintainer
+
+- [cogan17](https://github.com/cogan17)
+
+## 🙏 Credits
+
+- [JonesqPacMan](https://github.com/JonesqPacMan/android_device_xiaomi_rothko_twrp): original rothko device tree this one is based on
+- [TeamWin](https://github.com/TeamWin): TWRP
