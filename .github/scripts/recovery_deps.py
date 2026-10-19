@@ -27,8 +27,11 @@ root, sources = sys.argv[1], sys.argv[2:]
 
 
 def readelf(path, flag, pattern):
-    out = subprocess.run(['readelf', flag, '-W', path], capture_output=True, text=True).stdout
-    return re.findall(pattern, out)
+    r = subprocess.run(['readelf', flag, '-W', path], capture_output=True, text=True)
+    # a readelf failure must not look like "no dependencies" and silently pass the gate
+    if r.returncode != 0:
+        sys.exit(f'::error title=Unreadable ELF::readelf {flag} failed on {path}: {r.stderr.strip()}')
+    return re.findall(pattern, r.stdout)
 
 
 def elfs():
