@@ -1,0 +1,80 @@
+name: Verify TWRP image (rothko)
+
+# Cheap pre-flash check: compares a built TWRP vendor_boot.img with the stock one
+# (both taken from existing artifacts, no source sync) before anyone flashes it.
+on:
+  workflow_dispatch:
+    inputs:
+      twrp_run_id:
+        description: 'Run id of the "Build TWRP" run'
+      stock_run_id:
+        description: 'Run id of the "Extract stock blobs" run'
+  push:
+    branches: [twrp-14.1_a16]
+    paths: ['.github/workflows/verify-image.yml']
+
+permissions:
+  actions: read
+
+env:
+  TWRP_RUN: ${{ inputs.twrp_run_id || '39191260842' }}
+  STOCK_RUN: ${{ inputs.stock_run_id || '39179296762' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: twrp-rothko-vendor_boot-*
+          path: twrp
+          merge-multiple: true
+          run-id: ${{ env.TWRP_RUN }}
+          github-token: ${{ github.token }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stock-images-*
+          path: stock
+          merge-multiple: true
+          run-id: ${{ env.STOCK_RUN }}
+          github-token: ${{ github.token }}
+
+      - name: Unpack both images
+        run: |
+          sudo apt-get -o Acquire::Retries=3 install -y lz4 cpio >/dev/null
+          git clone -q --depth 1 https://android.googlesource.com/platform/system/tools/mkbootimg ~/mkbootimg
+          (cd twrp && sha256sum -c vendor_boot.img.sha256)
+          for n in twrp stock; do
+            python3 ~/mkbootimg/unpack_bootimg.py --boot_img $n/vendor_boot.img --out u-$n > $n.txt
+            mkdir -p r-$n
+            for f in u-$n/vendor_ramdisk*; do
+              case "$(head -c4 "$f" | od -An -tx1 | tr -d ' ')" in
+                02214c18) lz4 -dc "$f" ;;
+                1f8b*) gzip -dc "$f" ;;
+                *) cat "$f" ;;
+              esac | (cd r-$n && cpio -idm --quiet --no-absolute-filenames)
+            done
+          done
+
+      - name: Compare
+        run: |
+          hdr() { grep -iE 'header version|page size|address|command line|dtb size|ramdisk total size|vendor_ramdisk0' "$1" | tr '\n' ';'; }
+          echo "::notice title=TWRP header::$(hdr twrp.txt)"
+          echo "::notice title=Stock header::$(hdr stock.txt)"
+          bad=0
+          check() { if eval "$2"; then echo "::notice title=OK::$1"; else echo "::error title=FAIL::$1"; bad=1; fi; }
+          check "dtb identical to stock" 'cmp -s u-twrp/dtb u-stock/dtb'
+          check "TWRP UI present (twres/, system/bin/recovery)" '[ -d r-twrp/twres ] && [ -e r-twrp/system/bin/recovery ]'
+          check "twrp.flags present" '[ -f r-twrp/system/etc/twrp.flags ]'
+          check "first-stage fstab matches stock" 'cmp -s r-twrp/first_stage_ramdisk/fstab.mt6989 r-stock/first_stage_ramdisk/fstab.mt6989'
+          # Android's normal boot loads these from vendor_boot too, so they must equal stock
+          d=$(diff -rq r-twrp/lib/modules r-stock/lib/modules || true)
+          check "lib/modules identical to stock ($(ls r-stock/lib/modules | wc -l) files)" '[ -z "$d" ]'
+          [ -z "$d" ] || echo "::warning title=modules diff::$(echo "$d" | head -20 | tr '\n' ';')"
+          echo "::notice title=Stock-only top-level ramdisk entries::$(comm -13 <(ls r-twrp) <(ls r-stock) | tr '\n' ' ')"
+          exit $bad
