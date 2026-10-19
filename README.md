@@ -34,7 +34,8 @@
 ### 🛠️ Untuk Developer
 
 **[Catatan & pelajaran membangun tree ini →](docs/developer.md)**
-<sub>Berisi kesalahan yang sudah kami buat — biar kamu tidak mengulanginya.</sub>
+
+*Berisi kesalahan yang sudah kami buat — biar kamu tidak mengulanginya.*
 
 ---
 
