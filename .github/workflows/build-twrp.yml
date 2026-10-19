@@ -50,7 +50,7 @@ jobs:
           # runner apt mirrors flake now and then
           for i in 1 2 3; do sudo apt-get -o Acquire::Retries=3 update && break; sleep 15; done
           sudo apt-get -o Acquire::Retries=3 install -y bc bison build-essential curl flex git gnupg gperf libssl-dev \
-            libxml2-utils lz4 python-is-python3 rsync unzip xsltproc zip zlib1g-dev
+            libxml2-utils lz4 python-is-python3 rsync unzip xsltproc zip zlib1g-dev zstd
           mkdir -p ~/bin
           curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
           chmod +x ~/bin/repo
@@ -83,7 +83,11 @@ jobs:
           mkdir -p "$SRC/device/xiaomi"
           cp -a device-tree "$SRC/device/xiaomi/rothko"
           cd "$SRC"
-          for p in device/xiaomi/rothko/patches/bootable_recovery/*.patch; do git -C bootable/recovery apply "$SRC/$p"; done
+          # patches/<project path with / as _>/*.patch, e.g. build_make -> build/make
+          for d in device/xiaomi/rothko/patches/*/; do
+            t=$(basename "$d"); t=${t//_//}
+            for p in "$d"*.patch; do git -C "$t" apply "$SRC/$p"; done
+          done
           {
             export ALLOW_MISSING_DEPENDENCIES=true
             source build/envsetup.sh

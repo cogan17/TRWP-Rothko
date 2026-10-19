@@ -1,33 +1,39 @@
 name: Verify TWRP image (rothko)
 
-# Cheap pre-flash check: compares a built TWRP vendor_boot.img with the stock one
-# (both taken from existing artifacts, no source sync) before anyone flashes it.
+# Pre-flash gate: compares a built TWRP vendor_boot.img with the stock one (both
+# from artifacts, no source sync). Only an image that passes is packaged for users.
 on:
+  workflow_run:
+    workflows: ['Build TWRP (rothko)']
+    types: [completed]
   workflow_dispatch:
     inputs:
       twrp_run_id:
         description: 'Run id of the "Build TWRP" run'
       stock_run_id:
         description: 'Run id of the "Extract stock blobs" run'
-  push:
-    branches: [twrp-14.1_a16]
-    paths: ['.github/workflows/verify-image.yml']
 
 permissions:
   actions: read
 
 env:
-  TWRP_RUN: ${{ inputs.twrp_run_id || '39191260842' }}
+  TWRP_RUN: ${{ github.event.workflow_run.id || inputs.twrp_run_id }}
   STOCK_RUN: ${{ inputs.stock_run_id || '39179296762' }}
+  VERSION: OS3.0.301.0.WNNIDXM
 
 jobs:
   verify:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
       run:
         shell: bash
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
       - uses: actions/download-artifact@v4
         with:
           pattern: twrp-rothko-vendor_boot-*
@@ -46,65 +52,45 @@ jobs:
 
       - name: Unpack both images
         run: |
-          sudo apt-get -o Acquire::Retries=3 install -y lz4 cpio >/dev/null
+          sudo apt-get -o Acquire::Retries=3 install -y lz4 zstd cpio >/dev/null
           git clone -q --depth 1 https://android.googlesource.com/platform/system/tools/mkbootimg ~/mkbootimg
           (cd twrp && sha256sum -c vendor_boot.img.sha256)
+          unpack() {
+            case "$(head -c4 "$1" | od -An -tx1 | tr -d ' ')" in
+              02214c18) lz4 -dc "$1" ;;
+              28b52ffd) zstd -dc "$1" ;;
+              1f8b*) gzip -dc "$1" ;;
+              *) cat "$1" ;;
+            esac | (mkdir -p "$2" && cd "$2" && cpio -idm --quiet --no-absolute-filenames)
+          }
           for n in twrp stock; do
             python3 ~/mkbootimg/unpack_bootimg.py --boot_img $n/vendor_boot.img --out u-$n > $n.txt
-            mkdir -p r-$n
             for f in u-$n/vendor_ramdisk*; do
-              case "$(head -c4 "$f" | od -An -tx1 | tr -d ' ')" in
-                02214c18) lz4 -dc "$f" ;;
-                1f8b*) gzip -dc "$f" ;;
-                *) cat "$f" ;;
-              esac | (cd r-$n && cpio -idm --quiet --no-absolute-filenames)
+              unpack "$f" r-$n                        # all fragments merged
+              unpack "$f" frag-$n-$(basename "$f")    # each fragment alone
             done
           done
 
-      # TWRP bootlooped while stock has two fragments (TWRP one): show what each fragment holds
-      - name: Per-fragment layout
+      - name: Layout report
         run: |
           for n in twrp stock; do
-            echo "::notice title=$n ramdisk table::$(grep -E 'vendor_ramdisk[0-9]|^ +(size|offset|type|name):' $n.txt | tr -s ' ' | tr '\n' ';')"
-            for f in u-$n/vendor_ramdisk*; do
-              d=frag-$n-$(basename "$f"); mkdir -p "$d"
-              case "$(head -c4 "$f" | od -An -tx1 | tr -d ' ')" in
-                02214c18) lz4 -dc "$f" ;;
-                1f8b*) gzip -dc "$f" ;;
-                *) cat "$f" ;;
-              esac | (cd "$d" && cpio -idm --quiet --no-absolute-filenames)
+            echo "::notice title=$n header::$(grep -vE '^ +board_id|^ +0x' $n.txt | tr -s ' ' | tr '\n' ';')"
+            for d in frag-$n-*; do
               has() { [ -e "$d/$1" ] && echo y || echo n; }
-              echo "::notice title=$n $(basename "$f")::$(stat -c%s "$f") bytes, $(find "$d" -type f | wc -l) files; system/bin/recovery=$(has system/bin/recovery) twres=$(has twres) init.recovery.mt6989.rc=$(has init.recovery.mt6989.rc) first_stage_ramdisk/fstab=$(has first_stage_ramdisk/fstab.mt6989) modules.load=$(has lib/modules/modules.load) modules.load.recovery=$(has lib/modules/modules.load.recovery) ko=$(ls "$d"/lib/modules 2>/dev/null | grep -c '\.ko$' || true); top: $(ls "$d" | tr '\n' ' ')"
+              echo "::notice title=$d::$(find "$d" -type f | wc -l) files; recovery=$(has system/bin/recovery) twres=$(has twres) fstab=$(has first_stage_ramdisk/fstab.mt6989) modules.load=$(has lib/modules/modules.load)"
             done
           done
+          echo "::notice title=TWRP ramdisk biggest files (KB)::$(find r-twrp -type f -printf '%k %P\n' | sort -rn | head -30 | tr '\n' ';')"
 
-      - name: Full headers and bootconfig
+      - name: Gate
         run: |
-          for n in twrp stock; do
-            echo "::notice title=$n full header::$(grep -vE '^ +board_id|^ +0x' $n.txt | tr -s ' ' | tr '\n' ';')"
-            if [ -s u-$n/bootconfig ]; then
-              echo "::notice title=$n bootconfig::$(tr '\n' ';' < u-$n/bootconfig)"
-            else
-              echo "::notice title=$n bootconfig::(none)"
-            fi
-          done
-
-      - name: Normal-boot files and size breakdown
-        run: |
-          lst() { (cd "$1" && find . -type f -o -type l | sed 's|^\./||' | sort); }
-          echo "::notice title=stock first_stage_ramdisk::$(lst frag-stock-vendor_ramdisk00/first_stage_ramdisk | tr '\n' ' ')"
-          echo "::notice title=twrp first_stage_ramdisk::$(lst frag-twrp-vendor_ramdisk00/first_stage_ramdisk | tr '\n' ' ')"
-          echo "::notice title=In stock platform fragment, missing from TWRP::$(comm -23 <(lst frag-stock-vendor_ramdisk00) <(lst frag-twrp-vendor_ramdisk00) | head -150 | tr '\n' ' ')"
-          echo "::notice title=TWRP ramdisk biggest dirs (uncompressed KB)::$(du -k --max-depth=3 frag-twrp-vendor_ramdisk00 | sort -rn | sed -n '2,40p' | sed 's|frag-twrp-vendor_ramdisk00/||' | tr '\t\n' ' ;')"
-          echo "::notice title=TWRP ramdisk biggest files (KB)::$(find frag-twrp-vendor_ramdisk00 -type f -printf '%k %P\n' | sort -rn | head -40 | tr '\n' ';')"
-
-      - name: Compare
-        run: |
-          hdr() { grep -iE 'header version|page size|address|command line|dtb size|ramdisk total size|vendor_ramdisk0' "$1" | tr '\n' ';'; }
-          echo "::notice title=TWRP header::$(hdr twrp.txt)"
-          echo "::notice title=Stock header::$(hdr stock.txt)"
           bad=0
           check() { if eval "$2"; then echo "::notice title=OK::$1"; else echo "::error title=FAIL::$1"; bad=1; fi; }
+          tw=$(grep -m1 'vendor ramdisk total size' twrp.txt | grep -o '[0-9]*$')
+          st=$(grep -A3 'vendor_ramdisk00: {' stock.txt | grep -m1 'size:' | grep -o '[0-9]*$')
+          # 3be0761f (65 MB lz4 ramdisk) bootlooped; stock normal boot loads its 41 MB platform fragment
+          check "TWRP ramdisk $tw bytes <= stock normal-boot ramdisk $st bytes" '[ "$tw" -le "$st" ]'
+          check "ramdisk is zstd" '[ "$(head -c4 u-twrp/vendor_ramdisk00 | od -An -tx1 | tr -d " ")" = 28b52ffd ]'
           check "dtb identical to stock" 'cmp -s u-twrp/dtb u-stock/dtb'
           check "TWRP UI present (twres/, system/bin/recovery)" '[ -d r-twrp/twres ] && [ -e r-twrp/system/bin/recovery ]'
           check "twrp.flags present" '[ -f r-twrp/system/etc/twrp.flags ]'
@@ -113,5 +99,24 @@ jobs:
           d=$(diff -rq r-twrp/lib/modules r-stock/lib/modules || true)
           check "lib/modules identical to stock ($(ls r-stock/lib/modules | wc -l) files)" '[ -z "$d" ]'
           [ -z "$d" ] || echo "::warning title=modules diff::$(echo "$d" | head -20 | tr '\n' ';')"
-          echo "::notice title=Stock-only top-level ramdisk entries::$(comm -13 <(ls r-twrp) <(ls r-stock) | tr '\n' ' ')"
           exit $bad
+
+      - name: Package for end users
+        run: |
+          t=TWRP-rothko-$VERSION.img; s=STOK-vendor_boot-$VERSION.img
+          mkdir dist
+          cp twrp/vendor_boot.img dist/$t
+          cp stock/vendor_boot.img dist/$s
+          ts=$(sha256sum dist/$t | cut -d' ' -f1); ss=$(sha256sum dist/$s | cut -d' ' -f1)
+          for f in repo/release/*; do
+            # Windows scripts and notes: fill in names and hashes, CRLF line endings
+            sed -e "s/@VERSION@/$VERSION/g" -e "s/@TWRP_IMG@/$t/g" -e "s/@TWRP_SHA256@/$ts/g" \
+                -e "s/@STOCK_IMG@/$s/g" -e "s/@STOCK_SHA256@/$ss/g" -e 's/$/\r/' "$f" > "dist/$(basename "$f")"
+          done
+          ! grep -l '@[A-Z0-9_]*@' dist/*.bat dist/*.txt
+          echo "::notice title=Paket siap::$t sha256 $ts; $s sha256 $ss"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PAKET-TWRP-rothko-${{ env.VERSION }}
+          path: dist/
