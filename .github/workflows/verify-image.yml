@@ -209,6 +209,7 @@ jobs:
       - name: Publish pre-release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           command -v zip >/dev/null 2>&1 || { sudo apt-get update -q && sudo apt-get install -y -q zip; }
           zip="PAKET-TWRP-rothko-$VERSION.zip"
