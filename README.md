@@ -67,5 +67,5 @@
 ---
 
 <p align="center">
-  <sub>Maintainer <b>Cogan17</b> &nbsp;·&nbsp; tree asal <b>JonesqPacMan</b> &nbsp;·&nbsp; <b>TeamWin Recovery Project</b></sub>
+  Maintainer <b>Cogan17</b> &nbsp;·&nbsp; tree asal <b>JonesqPacMan</b> &nbsp;·&nbsp; <b>TeamWin Recovery Project</b>
 </p>
