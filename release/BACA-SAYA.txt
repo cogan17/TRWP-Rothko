@@ -5,6 +5,7 @@ Firmware: @VERSION@
 ISI PAKET
   1-PASANG-TWRP.bat       : memasang TWRP
   2-KEMBALIKAN-STOK.bat   : mengembalikan HP seperti semula (kalau ada masalah)
+  3-AMBIL-LOG.bat         : mengambil catatan error kalau TWRP macet
   @TWRP_IMG@
   @STOCK_IMG@
   Jangan mengganti nama file .img di atas.
