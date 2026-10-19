@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <b>🇮🇩 Bahasa Indonesia</b> &nbsp;·&nbsp; <a href="README.en.md">🇬🇧 English</a>
+  <b><img src="https://flagcdn.com/24x18/id.png" width="22" alt=""> Bahasa Indonesia</b> &nbsp;·&nbsp; <a href="README.en.md"><img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> English</a>
 </p>
 
 <p align="center">
