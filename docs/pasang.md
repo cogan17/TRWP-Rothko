@@ -31,11 +31,11 @@ Lanjut: [cara masuk TWRP →](masuk-twrp.md)
 
 ## Cara unduh paket
 
-1. Buka tab **Actions** di repository → workflow **Verify TWRP image**.
-2. Pilih run **terbaru** yang berhasil (centang hijau).
-3. Scroll ke bawah ke bagian **Artifacts** → klik **`PAKET-TWRP-rothko-...`** (zip ~88 MB).
+1. Buka halaman **[Releases](https://github.com/cogan17/TRWP-Rothko/releases)**.
+2. Pilih rilis terbaru (mis. `OS3.0.301.0.WNNIDXM`).
+3. Di bagian **Assets**, klik **`PAKET-TWRP-rothko-...zip`** (~88 MB).
 
-> Artifact hanya bisa diunduh kalau kamu **login** ke GitHub.
+> Tidak perlu login — file rilis bisa langsung diunduh siapa saja.
 
 ## Isi paket
 

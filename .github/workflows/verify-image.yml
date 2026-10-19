@@ -15,6 +15,7 @@ on:
 
 permissions:
   actions: read
+  contents: write
 
 env:
   TWRP_RUN: ${{ github.event.workflow_run.id || inputs.twrp_run_id }}
@@ -204,6 +205,25 @@ jobs:
           done
           ! grep -l '@[A-Z0-9_]*@' dist/*.bat dist/*.txt
           echo "::notice title=Paket siap::$t sha256 $ts; $s sha256 $ss"
+
+      - name: Publish pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip="PAKET-TWRP-rothko-$VERSION.zip"
+          (cd dist && zip -qr "../$zip" .)
+          ts=$(sha256sum "dist/TWRP-rothko-$VERSION.img" | cut -d' ' -f1)
+          # one stable pre-release per firmware version; refresh it on every run
+          gh release delete "$VERSION" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$VERSION" "$zip" --prerelease --title "TWRP rothko $VERSION" --notes \
+          "TWRP untuk Xiaomi 14T Pro (rothko) — firmware \`$VERSION\`.
+
+          Unduh **$zip**, ekstrak semua ke folder platform-tools, lalu jalankan \`1-PASANG-TWRP.bat\`. Panduan lengkap ada di repository (folder \`docs/\`).
+
+          TWRP image sha256: \`$ts\`
+
+          ⚠️ Pra-rilis — backup data dulu, uji di perangkatmu."
+          echo "::notice title=Pre-release::$VERSION -> $zip"
 
       - uses: actions/upload-artifact@v4
         with:
