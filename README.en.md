@@ -22,7 +22,8 @@
 
 ### 📖 User Guide
 
-<sub>The detailed guides are written in Indonesian.</sub>
+
+*The detailed guides are written in Indonesian.*
 
 |   |   |
 |---|---|
@@ -36,7 +37,8 @@
 ### 🛠️ For Developers
 
 **[Notes & lessons from building this tree →](docs/developer.md)**
-<sub>The mistakes we already made — so you don't repeat them.</sub>
+
+*The mistakes we already made — so you don't repeat them.*
 
 ---
 
