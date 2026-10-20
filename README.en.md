@@ -16,6 +16,8 @@
   <a href="https://github.com/cogan17/TRWP-Rothko/releases"><b>⬇️ Download</b></a>
   &nbsp;·&nbsp;
   <a href="docs/pasang.md"><b>📖 Guide</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://t.me/coganTWRP"><b>💬 Telegram Community</b></a>
 </p>
 
 ---
