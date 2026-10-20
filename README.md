@@ -17,6 +17,8 @@
   &nbsp;·&nbsp;
   <a href="docs/pasang.md"><b>📖 Panduan</b></a>
   &nbsp;·&nbsp;
+  <a href="CHANGELOG.md"><b>📝 Catatan Rilis</b></a>
+  &nbsp;·&nbsp;
   <a href="https://t.me/coganTWRP"><b>💬 Komunitas Telegram</b></a>
 </p>
 

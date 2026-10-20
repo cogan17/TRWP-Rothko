@@ -44,6 +44,12 @@ jobs:
         run: |
           . repo/.github/firmware.env
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          # build version = newest "## vX.Y" in CHANGELOG.md; goes into the release title, notes and BUILD-INFO
+          BUILD_VER=$(grep -m1 -oE '^## v[0-9]+(\.[0-9]+)*' repo/CHANGELOG.md | cut -c4- || true)
+          [ -n "$BUILD_VER" ] || { echo "::error title=CHANGELOG::CHANGELOG.md needs a '## vX.Y' heading for this release"; exit 1; }
+          EN_VER=$(grep -m1 -oE '^## v[0-9]+(\.[0-9]+)*' repo/CHANGELOG.en.md | cut -c4- || true)
+          [ "$EN_VER" = "$BUILD_VER" ] || { echo "::error title=CHANGELOG::CHANGELOG.en.md is at '$EN_VER', CHANGELOG.md at '$BUILD_VER'; update both"; exit 1; }
+          echo "BUILD_VER=$BUILD_VER" >> "$GITHUB_ENV"
           echo "STOCK_RUN=${INPUT_STOCK_RUN:-$STOCK_RUN}" >> "$GITHUB_ENV"
 
       - uses: actions/download-artifact@v4
@@ -80,7 +86,7 @@ jobs:
           # shortcut: files deleted from recovery/root stay in the image; rebuild after deleting any
           # who built it, readable in TWRP as /BUILD-INFO.txt; a fork can edit this, the attestation is the proof
           cat > repo/recovery/root/BUILD-INFO.txt <<INFO
-          TWRP Xiaomi 14T Pro (rothko) - firmware $VERSION
+          TWRP Xiaomi 14T Pro (rothko) $BUILD_VER - firmware $VERSION
           Asli dari   : https://github.com/cogan17/TWRP-14T-PRO (maintainer: cogan17)
           Dibangun di : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY @ $(git -C repo rev-parse --short HEAD)
           Build TWRP  : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$TWRP_RUN
@@ -235,15 +241,35 @@ jobs:
         run: |
           zip="PAKET-TWRP-rothko-$VERSION.zip"
           ts=$(sha256sum "dist/TWRP-rothko-$VERSION.img" | cut -d' ' -f1)
-          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. Sudah punya TWRP? Dari PC: masuk TWRP lalu jalankan 5-UPDATE-LEWAT-TWRP.bat. Tanpa PC: unduh TWRP-rothko-$VERSION.img, lalu di TWRP: Install > Install Image > vendor_boot. TWRP image sha256: $ts. Cek keaslian: https://github.com/$GH_REPO/attestations. Pra-rilis - backup data dulu, uji di perangkatmu."
+          sec() { awk '/^## v/{n++} n==1' "$1"; }  # the newest version's section of a changelog
+          {
+            echo "**$BUILD_VER** · firmware \`$VERSION\` · Xiaomi 14T Pro (rothko)"
+            echo
+            sec repo/CHANGELOG.md
+            echo
+            echo "**Pasang:** ekstrak zip ke folder \`platform-tools\`, jalankan \`1-PASANG-TWRP.bat\`. **Sudah punya TWRP?** Dari PC: masuk TWRP lalu jalankan \`5-UPDATE-LEWAT-TWRP.bat\`. Tanpa PC: unduh \`TWRP-rothko-$VERSION.img\`, lalu di TWRP: Install → Install Image → \`vendor_boot\`. Panduan: https://github.com/$GH_REPO"
+            echo
+            echo "<details><summary>English</summary>"
+            echo
+            sec repo/CHANGELOG.en.md
+            echo
+            echo "**Install:** extract the zip into \`platform-tools\`, run \`1-PASANG-TWRP.bat\`. **Already have TWRP?** From a PC: enter TWRP and run \`5-UPDATE-LEWAT-TWRP.bat\`. Without a PC: download \`TWRP-rothko-$VERSION.img\`, then in TWRP: Install → Install Image → \`vendor_boot\`. Guide: https://github.com/$GH_REPO/blob/HEAD/README.en.md"
+            echo
+            echo "</details>"
+            echo
+            echo "---"
+            echo "TWRP image sha256 \`$ts\` · Cek keaslian / authenticity: https://github.com/$GH_REPO/attestations"
+            echo
+            echo "⚠️ Pra-rilis — backup data dulu. / Pre-release — back up your data first."
+          } > /tmp/notes.md
           # one stable pre-release per firmware version; refresh it on every run
           gh release delete "$VERSION" --yes --cleanup-tag 2>/dev/null || true
           # bare images too: updating from inside TWRP (Install Image) needs no PC and no unzip
-          if ! gh release create "$VERSION" "$zip" "dist/TWRP-rothko-$VERSION.img" "dist/STOK-vendor_boot-$VERSION.img" --prerelease --title "TWRP rothko $VERSION" --notes "$notes" 2>/tmp/rel.err; then
+          if ! gh release create "$VERSION" "$zip" "dist/TWRP-rothko-$VERSION.img" "dist/STOK-vendor_boot-$VERSION.img" --prerelease --title "$BUILD_VER · $VERSION" --notes-file /tmp/notes.md 2>/tmp/rel.err; then
             echo "::error title=Pre-release gagal::$(tr '\n' ' ' </tmp/rel.err | sed 's/%/%25/g')"
             exit 1
           fi
-          echo "::notice title=Pre-release::$VERSION -> $zip"
+          echo "::notice title=Pre-release::$BUILD_VER · $VERSION -> $zip"
 
       - uses: actions/upload-artifact@v4
         with:

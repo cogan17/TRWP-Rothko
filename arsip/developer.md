@@ -64,6 +64,8 @@ Relink list TWRP membawa lib AIDL **V1**, padahal vold kini menaut keystore2-**V
 | `build-twrp.yml` | sync manifest TWRP 14.1 (dikunci `twrp-sources.lock.xml`), terapkan `patches/`, build `vendorbootimage`, jalankan `recovery_deps.py` |
 | `verify-image.yml` | repack jadi vendor_boot dua-fragmen seperti stok, jalankan gate struktur, kemas zip end-user, tandatangani (attestation), lalu terbitkan pre-release. **Jalankan via `workflow_dispatch` dari branch kerja** (Pelajaran 2) |
 | `update-twrp-sources.yml` | segarkan kunci sumber |
+
+> **Rilis baru:** tambahkan dulu bagian `## vX.Y` (✨ Baru / 🔧 Perbaikan) di `CHANGELOG.md` **dan** `CHANGELOG.en.md`. Verify mengambil versi + catatan rilis dari situ, dan berhenti kalau versi kedua file berbeda.
 | `extract-stock.yml` | unduh ROM resmi & ekstrak blob stok (**manual; berat — 6.3 GB**) |
 
 ### Jalur cepat (fast path)
