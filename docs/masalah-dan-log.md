@@ -35,5 +35,5 @@ Keduanya menyimpan hasil ke folder **`Downloads`** di PC, lalu membuka foldernya
 |---|---|---|
 | Bootloop logo Mi | image rusak / salah paket | [Kembali ke stok](kembali-ke-stok.md) |
 | "Failed to decrypt" / pola gagal | protektor / pola | [Enkripsi & Pola](enkripsi-dan-pola.md) |
-| Layar tidak bisa disentuh | mode THP touch | [Catatan Developer §6](developer.md#6-touch-focaltech-mulai-di-mode-thp) |
+| Layar tidak bisa disentuh | mode THP touch | [Catatan Developer §6](../arsip/developer.md#6-touch-focaltech-mulai-di-mode-thp) |
 | Download/DCIM kosong | data belum didekripsi | buka pola dulu |

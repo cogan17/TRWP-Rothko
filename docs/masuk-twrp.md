@@ -26,6 +26,6 @@ su -c 'reboot recovery'
 
 ## ⚠️ Jangan pakai "reboot recovery" kalau TWRP sedang bermasalah
 
-Perintah `reboot recovery` menulis tanda **BCB** di partisi `misc`. Kalau TWRP-nya crash, HP bisa **bootloop** terus. Dengan TWRP yang sudah berfungsi, ini aman — TWRP membersihkan tanda itu saat menyala. Penjelasan teknis: [Catatan Developer → Masuk recovery](developer.md#8-masuk-recovery).
+Perintah `reboot recovery` menulis tanda **BCB** di partisi `misc`. Kalau TWRP-nya crash, HP bisa **bootloop** terus. Dengan TWRP yang sudah berfungsi, ini aman — TWRP membersihkan tanda itu saat menyala. Penjelasan teknis: [Catatan Developer → Masuk recovery](../arsip/developer.md#8-masuk-recovery).
 
 Keluar dari TWRP → **Reboot → System**.

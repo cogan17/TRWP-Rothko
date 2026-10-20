@@ -51,4 +51,4 @@ Lanjut: [cara masuk TWRP →](masuk-twrp.md)
 ## ⚠️ Penting
 
 - Pasang **hanya** file untuk **rothko (14T Pro)** — jangan dari HP lain.
-- `1-PASANG-TWRP.bat` memakai `fastboot reboot` biasa (bukan `reboot recovery`) — ini disengaja, lihat [kenapa](developer.md#8-masuk-recovery).
+- `1-PASANG-TWRP.bat` memakai `fastboot reboot` biasa (bukan `reboot recovery`) — ini disengaja, lihat [kenapa](../arsip/developer.md#8-masuk-recovery).

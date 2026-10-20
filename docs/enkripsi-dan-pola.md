@@ -27,4 +27,4 @@ Salah berulang bisa kena **kunci sementara** (gatekeeper throttle). Cukup sekali
 
 ## Kenapa ini rumit di HP ini? (singkat)
 
-HyperOS menyimpan kunci utama di **Weaver** (chip keamanan NXP) yang tidak bisa diakses recovery, tapi juga menyimpan pelindung **Gatekeeper** untuk pola yang sama. TWRP memakai jalur Gatekeeper itu. Detail teknis: [Catatan Developer](developer.md#4-hyperos-lskf-weaver-aktif-gatekeeper-cadangan).
+HyperOS menyimpan kunci utama di **Weaver** (chip keamanan NXP) yang tidak bisa diakses recovery, tapi juga menyimpan pelindung **Gatekeeper** untuk pola yang sama. TWRP memakai jalur Gatekeeper itu. Detail teknis: [Catatan Developer](../arsip/developer.md#4-hyperos-lskf-weaver-aktif-gatekeeper-cadangan).
