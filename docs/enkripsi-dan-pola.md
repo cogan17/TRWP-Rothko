@@ -1,6 +1,6 @@
 # 🔐 Enkripsi & Pola
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](enkripsi-dan-pola.en.md)
 
 Data di HP terenkripsi (FBE). TWRP perlu **pola/sandi yang sama** dengan layar kunci untuk membukanya.
 

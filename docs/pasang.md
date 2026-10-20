@@ -1,6 +1,6 @@
 # 📥 Pasang TWRP
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](pasang.en.md)
 
 Memasang TWRP ke Xiaomi 14T Pro (rothko) lewat **platform-tools** dan skrip `.bat` yang sudah disediakan. Tidak perlu mengetik perintah manual.
 

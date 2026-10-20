@@ -1,6 +1,6 @@
 # 🔏 Keaslian & Kredit
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](keaslian-dan-kredit.en.md)
 
 TWRP rothko di repo ini dibangun dan dirilis otomatis oleh GitHub Actions dari **[cogan17/TWRP-14T-PRO](https://github.com/cogan17/TWRP-14T-PRO)**. Setiap file rilis **ditandatangani secara digital**, jadi siapa pun bisa membuktikan asal-usulnya.
 

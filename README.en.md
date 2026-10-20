@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/cogan17/TRWP-Rothko/releases"><b>⬇️ Download</b></a>
+  <a href="https://github.com/cogan17/TWRP-14T-PRO/releases"><b>⬇️ Download</b></a>
   &nbsp;·&nbsp;
-  <a href="docs/pasang.md"><b>📖 Guide</b></a>
+  <a href="docs/pasang.en.md"><b>📖 Guide</b></a>
   &nbsp;·&nbsp;
   <a href="https://t.me/coganTWRP"><b>💬 Telegram Community</b></a>
 </p>
@@ -24,18 +24,15 @@
 
 ### 📖 User Guide
 
-
-*The detailed guides are written in Indonesian.*
-
 |   |   |
 |---|---|
-| 📥 **[Install / Update TWRP](docs/pasang.md)** | From a PC (`.bat`) or straight from TWRP |
-| 🔑 **[Enter TWRP](docs/masuk-twrp.md)** | Buttons or Termux |
-| 💾 **[Backup](docs/backup.md)** | Data & key partitions |
-| 🔄 **[Update HyperOS](docs/update-hos.md)** | Update without losing data |
-| ↩️ **[Back to Stock](docs/kembali-ke-stok.md)** | Undo TWRP / fix bootloop |
-| 🔐 **[Encryption & Pattern](docs/enkripsi-dan-pola.md)** | Unlock encrypted data |
-| 🩺 **[Issues & Logs](docs/masalah-dan-log.md)** | When something goes wrong |
+| 📥 **[Install / Update TWRP](docs/pasang.en.md)** | From a PC (`.bat`) or straight from TWRP |
+| 🔑 **[Enter TWRP](docs/masuk-twrp.en.md)** | Buttons or Termux |
+| 💾 **[Backup](docs/backup.en.md)** | Data & key partitions |
+| 🔄 **[Update HyperOS](docs/update-hos.en.md)** | Update without losing data |
+| ↩️ **[Back to Stock](docs/kembali-ke-stok.en.md)** | Undo TWRP / fix bootloop |
+| 🔐 **[Encryption & Pattern](docs/enkripsi-dan-pola.en.md)** | Unlock encrypted data |
+| 🩺 **[Issues & Logs](docs/masalah-dan-log.en.md)** | When something goes wrong |
 
 ---
 
@@ -69,5 +66,5 @@
 
 <p align="center">
   Maintainer <b>Cogan17</b> &nbsp;·&nbsp; original tree <a href="https://github.com/JonesqPacMan/android_device_xiaomi_rothko_twrp"><b>JonesqPacMan</b></a> &nbsp;·&nbsp; <b>TeamWin Recovery Project</b>
-  <br><a href="docs/keaslian-dan-kredit.md">🔏 Authenticity & full credits</a> (Indonesian)
+  <br><a href="docs/keaslian-dan-kredit.en.md">🔏 Authenticity & full credits</a>
 </p>

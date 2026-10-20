@@ -1,6 +1,6 @@
 # 💾 Backup
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](backup.en.md)
 
 Selalu **backup dulu** sebelum bereksperimen. Datamu lebih berharga dari waktu.
 

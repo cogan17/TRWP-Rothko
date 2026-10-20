@@ -1,6 +1,6 @@
 # 🔑 Masuk TWRP
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](masuk-twrp.en.md)
 
 Ada dua cara masuk ke TWRP. Keduanya aman.
 

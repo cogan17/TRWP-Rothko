@@ -1,6 +1,6 @@
 # 🔄 Update HyperOS Tanpa Kehilangan Data
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](update-hos.en.md)
 
 Saat HyperOS keluar update, TWRP & root biasanya **ikut hilang**. Ini cara update yang **aman** — datamu tetap utuh, tanpa restore yang berisiko.
 
