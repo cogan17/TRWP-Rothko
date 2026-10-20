@@ -16,6 +16,10 @@ on:
 permissions:
   actions: read
   contents: write
+  # artifact attestation: signed proof the package was built here (gh attestation verify)
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 env:
   TWRP_RUN: ${{ github.event.workflow_run.id || inputs.twrp_run_id }}
@@ -74,6 +78,15 @@ jobs:
           # Fast path: the build copies recovery/root verbatim, so overlaying this commit's copy gives
           # the same result for ramdisk-only changes (rc, scripts, blobs) without a 2-hour rebuild.
           # shortcut: files deleted from recovery/root stay in the image; rebuild after deleting any
+          # who built it, readable in TWRP as /BUILD-INFO.txt; a fork can edit this, the attestation is the proof
+          cat > repo/recovery/root/BUILD-INFO.txt <<INFO
+          TWRP Xiaomi 14T Pro (rothko) - firmware $VERSION
+          Asli dari   : https://github.com/cogan17/TWRP-14T-PRO (maintainer: cogan17)
+          Dibangun di : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY @ $(git -C repo rev-parse --short HEAD)
+          Build TWRP  : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$TWRP_RUN
+          Tanggal     : $(date -u '+%Y-%m-%d %H:%M UTC')
+          Cek keaslian: gh attestation verify <file> --repo cogan17/TWRP-14T-PRO
+          INFO
           python3 - <<'EOF'
           import os
           d = open('all.cpio', 'rb').read()
@@ -204,18 +217,25 @@ jobs:
                 -e "s/@STOCK_IMG@/$s/g" -e "s/@STOCK_SHA256@/$ss/g" -e 's/$/\r/' "$f" > "dist/$(basename "$f")"
           done
           ! grep -l '@[A-Z0-9_]*@' dist/*.bat dist/*.txt
+          command -v zip >/dev/null 2>&1 || { sudo apt-get update -q && sudo apt-get install -y -q zip; }
+          (cd dist && zip -qr "../PAKET-TWRP-rothko-$VERSION.zip" .)
           echo "::notice title=Paket siap::$t sha256 $ts; $s sha256 $ss"
+
+      # signed before publishing: if this fails, the existing pre-release stays untouched
+      - uses: actions/attest@v4
+        with:
+          subject-path: |
+            PAKET-TWRP-rothko-${{ env.VERSION }}.zip
+            dist/TWRP-rothko-${{ env.VERSION }}.img
 
       - name: Publish pre-release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          command -v zip >/dev/null 2>&1 || { sudo apt-get update -q && sudo apt-get install -y -q zip; }
           zip="PAKET-TWRP-rothko-$VERSION.zip"
-          (cd dist && zip -qr "../$zip" .)
           ts=$(sha256sum "dist/TWRP-rothko-$VERSION.img" | cut -d' ' -f1)
-          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. TWRP image sha256: $ts. Pra-rilis - backup data dulu, uji di perangkatmu."
+          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. TWRP image sha256: $ts. Cek keaslian: https://github.com/$GH_REPO/attestations. Pra-rilis - backup data dulu, uji di perangkatmu."
           # one stable pre-release per firmware version; refresh it on every run
           gh release delete "$VERSION" --yes --cleanup-tag 2>/dev/null || true
           if ! gh release create "$VERSION" "$zip" --prerelease --title "TWRP rothko $VERSION" --notes "$notes" 2>/tmp/rel.err; then
