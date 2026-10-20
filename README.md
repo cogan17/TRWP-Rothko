@@ -26,7 +26,7 @@
 
 |   |   |
 |---|---|
-| 📥 **[Pasang TWRP](docs/pasang.md)** | Flash lewat platform-tools + `.bat` |
+| 📥 **[Pasang / Update TWRP](docs/pasang.md)** | Lewat PC (`.bat`) atau langsung dari TWRP |
 | 🔑 **[Masuk TWRP](docs/masuk-twrp.md)** | Tombol atau Termux |
 | 💾 **[Backup](docs/backup.md)** | Data & partisi penting |
 | 🔄 **[Update HyperOS](docs/update-hos.md)** | Update tanpa kehilangan data |

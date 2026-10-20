@@ -235,10 +235,11 @@ jobs:
         run: |
           zip="PAKET-TWRP-rothko-$VERSION.zip"
           ts=$(sha256sum "dist/TWRP-rothko-$VERSION.img" | cut -d' ' -f1)
-          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. TWRP image sha256: $ts. Cek keaslian: https://github.com/$GH_REPO/attestations. Pra-rilis - backup data dulu, uji di perangkatmu."
+          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. Sudah punya TWRP? Cukup unduh TWRP-rothko-$VERSION.img, lalu di TWRP: Install > Install Image > Vendor Boot Image. TWRP image sha256: $ts. Cek keaslian: https://github.com/$GH_REPO/attestations. Pra-rilis - backup data dulu, uji di perangkatmu."
           # one stable pre-release per firmware version; refresh it on every run
           gh release delete "$VERSION" --yes --cleanup-tag 2>/dev/null || true
-          if ! gh release create "$VERSION" "$zip" --prerelease --title "TWRP rothko $VERSION" --notes "$notes" 2>/tmp/rel.err; then
+          if ! # bare images too: updating from inside TWRP (Install Image) needs no PC and no unzip
+          gh release create "$VERSION" "$zip" "dist/TWRP-rothko-$VERSION.img" "dist/STOK-vendor_boot-$VERSION.img" --prerelease --title "TWRP rothko $VERSION" --notes "$notes" 2>/tmp/rel.err; then
             echo "::error title=Pre-release gagal::$(tr '\n' ' ' </tmp/rel.err | sed 's/%/%25/g')"
             exit 1
           fi

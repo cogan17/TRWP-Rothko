@@ -15,6 +15,12 @@ Mau menghapus TWRP dan kembali seperti semula? **Data tidak dihapus.** Ini juga 
 
 Skrip memeriksa file stok (cek SHA256) sebelum menulis, jadi aman.
 
+## Tanpa PC (kalau TWRP masih bisa dibuka)
+
+1. Unduh **`STOK-vendor_boot-<versi>.img`** dari [Releases](https://github.com/cogan17/TWRP-14T-PRO/releases) (versi = HyperOS-mu), atau ambil dari isi paket.
+2. Di TWRP: **Install → Install Image** → pilih file STOK → **Vendor Boot Image** → geser.
+3. **Reboot → System.** TWRP hilang, HP kembali stok — cocok sebelum ambil OTA.
+
 ---
 
 ## Kalau HP bootloop (muter di logo Mi)
