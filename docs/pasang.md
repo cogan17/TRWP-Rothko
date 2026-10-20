@@ -29,11 +29,26 @@ Lanjut: [cara masuk TWRP →](masuk-twrp.md)
 
 ---
 
+## 🔄 Sudah punya TWRP? Update lewat TWRP (tanpa PC)
+
+1. Di HP, buka **[Releases](https://github.com/cogan17/TWRP-14T-PRO/releases)** → unduh **`TWRP-rothko-<versi>.img`** saja (tidak perlu zip). Versinya harus **sama** dengan HyperOS-mu (*Setelan → Tentang ponsel*).
+2. [Masuk TWRP](masuk-twrp.md) → buka kunci dengan [pola](enkripsi-dan-pola.md).
+3. **Install** → tombol **Install Image** → buka folder `Download` → pilih `TWRP-rothko-<versi>.img`.
+4. Pilih **Vendor Boot Image** → geser untuk flash.
+5. **Reboot → Recovery.** Build terbaru punya file `/BUILD-INFO.txt` (lihat lewat *Advanced → File Manager*) berisi tanggal build-nya.
+
+> ⚠️ Wajib pilih **Vendor Boot Image** — **jangan** Boot / Init_boot. Salah partisi = bootloop.
+
+> 💡 Unduh juga **`STOK-vendor_boot-<versi>.img`** dan simpan di HP. Kalau Android tidak mau menyala tapi TWRP masih bisa dibuka, flash file STOK dengan cara yang sama. Kalau TWRP juga tidak bisa dibuka → pakai PC ([Kembali ke stok](kembali-ke-stok.md)).
+
+---
+
 ## Cara unduh paket
 
-1. Buka halaman **[Releases](https://github.com/cogan17/TRWP-Rothko/releases)**.
+1. Buka halaman **[Releases](https://github.com/cogan17/TWRP-14T-PRO/releases)**.
 2. Pilih rilis terbaru (mis. `OS3.0.301.0.WNNIDXM`).
-3. Di bagian **Assets**, klik **`PAKET-TWRP-rothko-...zip`** (~88 MB).
+3. Di bagian **Assets**, klik **`PAKET-TWRP-rothko-...zip`** (~88 MB) — untuk pasang lewat PC.
+   Update dari dalam TWRP? Cukup unduh **`TWRP-rothko-...img`**.
 
 > Tidak perlu login — file rilis bisa langsung diunduh siapa saja.
 

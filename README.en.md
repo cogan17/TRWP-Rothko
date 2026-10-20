@@ -29,7 +29,7 @@
 
 |   |   |
 |---|---|
-| 📥 **[Install TWRP](docs/pasang.md)** | Flash via platform-tools + `.bat` |
+| 📥 **[Install / Update TWRP](docs/pasang.md)** | From a PC (`.bat`) or straight from TWRP |
 | 🔑 **[Enter TWRP](docs/masuk-twrp.md)** | Buttons or Termux |
 | 💾 **[Backup](docs/backup.md)** | Data & key partitions |
 | 🔄 **[Update HyperOS](docs/update-hos.md)** | Update without losing data |
