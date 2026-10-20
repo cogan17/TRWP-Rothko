@@ -6,6 +6,9 @@ ISI PAKET
   1-PASANG-TWRP.bat       : memasang TWRP
   2-KEMBALIKAN-STOK.bat   : mengembalikan HP seperti semula (kalau ada masalah)
   3-AMBIL-LOG.bat         : mengambil catatan error kalau TWRP macet
+  4-LOG-BOOTLOOP.bat      : mengambil catatan kalau HP sempat bootloop
+  5-UPDATE-LEWAT-TWRP.bat : update TWRP dari PC saat HP sudah di TWRP
+  twrp-update.sh          : dipakai otomatis oleh 5-UPDATE-LEWAT-TWRP.bat
   @TWRP_IMG@
   @STOCK_IMG@
   Jangan mengganti nama file .img di atas.
@@ -14,7 +17,7 @@ SYARAT
   - Bootloader HP sudah di-unlock.
   - HP memakai firmware @VERSION@
     (cek di Setelan > Tentang ponsel > Versi HyperOS).
-  - Komputer Windows dengan Android platform-tools (fastboot).
+  - Komputer Windows dengan Android platform-tools (fastboot dan adb).
 
 CARA MEMASANG
   1. Salin SEMUA file paket ini ke folder platform-tools
@@ -24,6 +27,12 @@ CARA MEMASANG
 
   Skrip memeriksa file dan HP secara otomatis. Kalau ada yang tidak cocok,
   proses dibatalkan sebelum HP diubah.
+
+SUDAH PUNYA TWRP? CARA UPDATE (tanpa FASTBOOT)
+  Lewat PC : masuk TWRP (Power + Volume Atas), sambungkan kabel,
+             klik dua kali 5-UPDATE-LEWAT-TWRP.bat.
+  Tanpa PC : salin @TWRP_IMG@ ke HP, lalu di TWRP pilih
+             Install > Install Image > file itu > Vendor Boot Image.
 
 KALAU HP BOOTLOOP ATAU ADA MASALAH
   1. Matikan HP (tahan Power 10-15 detik).
