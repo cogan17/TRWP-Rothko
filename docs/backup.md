@@ -19,7 +19,7 @@ colok kabel → pilih **Transfer File (MTP)** → salin folder ke PC.
 ## Partisi penting (init_boot, boot, super)
 
 1. Di TWRP, buka menu **Backup**.
-2. Centang partisi yang mau dicadangkan — umumnya **Boot**, **Init_boot**, **Super**.
+2. Centang partisi yang mau dicadangkan — umumnya **boot**, **init_boot**, **super**.
 3. Geser untuk memulai.
 4. Hasil tersimpan di `TWRP/BACKUPS` di penyimpanan internal.
 

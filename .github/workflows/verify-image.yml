@@ -235,7 +235,7 @@ jobs:
         run: |
           zip="PAKET-TWRP-rothko-$VERSION.zip"
           ts=$(sha256sum "dist/TWRP-rothko-$VERSION.img" | cut -d' ' -f1)
-          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. Sudah punya TWRP? Dari PC: masuk TWRP lalu jalankan 5-UPDATE-LEWAT-TWRP.bat. Tanpa PC: unduh TWRP-rothko-$VERSION.img, lalu di TWRP: Install > Install Image > Vendor Boot Image. TWRP image sha256: $ts. Cek keaslian: https://github.com/$GH_REPO/attestations. Pra-rilis - backup data dulu, uji di perangkatmu."
+          notes="TWRP untuk Xiaomi 14T Pro (rothko), firmware $VERSION. Ekstrak zip ke folder platform-tools, jalankan 1-PASANG-TWRP.bat. Panduan: folder docs/. Sudah punya TWRP? Dari PC: masuk TWRP lalu jalankan 5-UPDATE-LEWAT-TWRP.bat. Tanpa PC: unduh TWRP-rothko-$VERSION.img, lalu di TWRP: Install > Install Image > vendor_boot. TWRP image sha256: $ts. Cek keaslian: https://github.com/$GH_REPO/attestations. Pra-rilis - backup data dulu, uji di perangkatmu."
           # one stable pre-release per firmware version; refresh it on every run
           gh release delete "$VERSION" --yes --cleanup-tag 2>/dev/null || true
           # bare images too: updating from inside TWRP (Install Image) needs no PC and no unzip

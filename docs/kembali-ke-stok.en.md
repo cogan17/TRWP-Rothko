@@ -18,7 +18,7 @@ The script checks the stock file (SHA256) before writing, so it's safe.
 ## Without a PC (if TWRP still opens)
 
 1. Download **`STOK-vendor_boot-<version>.img`** from [Releases](https://github.com/cogan17/TWRP-14T-PRO/releases) (version = your HyperOS), or take it from the package.
-2. In TWRP: **Install → Install Image** → pick the STOK file → **Vendor Boot Image** → swipe.
+2. In TWRP: **Install → Install Image** → pick the STOK file → **vendor_boot** → swipe.
 3. **Reboot → System.** TWRP is gone and the phone is stock again — handy before taking an OTA.
 
 ---

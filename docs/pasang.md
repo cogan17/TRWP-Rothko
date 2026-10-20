@@ -38,10 +38,10 @@ Lanjut: [cara masuk TWRP →](masuk-twrp.md)
 1. Di HP, buka **[Releases](https://github.com/cogan17/TWRP-14T-PRO/releases)** → unduh **`TWRP-rothko-<versi>.img`** saja (tidak perlu zip). Versinya harus **sama** dengan HyperOS-mu (*Setelan → Tentang ponsel*).
 2. [Masuk TWRP](masuk-twrp.md) → buka kunci dengan [pola](enkripsi-dan-pola.md).
 3. **Install** → tombol **Install Image** → buka folder `Download` → pilih `TWRP-rothko-<versi>.img`.
-4. Pilih **Vendor Boot Image** → geser untuk flash.
+4. Pilih **vendor_boot** → geser untuk flash.
 5. **Reboot → Recovery.** Build terbaru punya file `/BUILD-INFO.txt` (lihat lewat *Advanced → File Manager*) berisi tanggal build-nya.
 
-> ⚠️ Wajib pilih **Vendor Boot Image** — **jangan** Boot / Init_boot. Salah partisi = bootloop.
+> ⚠️ Wajib pilih **vendor_boot** — **jangan** boot / init_boot. Salah partisi = bootloop.
 
 > 💡 Unduh juga **`STOK-vendor_boot-<versi>.img`** dan simpan di HP. Kalau Android tidak mau menyala tapi TWRP masih bisa dibuka, flash file STOK dengan cara yang sama. Kalau TWRP juga tidak bisa dibuka → pakai PC ([Kembali ke stok](kembali-ke-stok.md)).
 
