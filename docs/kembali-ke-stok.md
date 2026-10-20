@@ -1,6 +1,6 @@
 # ↩️ Kembali ke Stok
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](kembali-ke-stok.en.md)
 
 Mau menghapus TWRP dan kembali seperti semula? **Data tidak dihapus.** Ini juga cara memperbaiki bootloop.
 

@@ -1,6 +1,6 @@
 # 🩺 Masalah & Log
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](masalah-dan-log.en.md)
 
 Kalau ada kendala, **jangan menebak** — ambil log dan kirim. Log menunjukkan persis di mana gagalnya.
 
