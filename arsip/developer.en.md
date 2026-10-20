@@ -65,6 +65,7 @@ TWRP's relink list carries the **V1** AIDL libs, while vold now links keystore2-
 | `verify-image.yml` | repack into a two-fragment vendor_boot like stock, run the structure gate, package the end-user zip, sign it (attestation) and publish the pre-release. **Run it via `workflow_dispatch` from the working branch** (Lesson 2) |
 | `update-twrp-sources.yml` | refresh the source pins |
 | `republish-release.yml` | publish an older version again from a Verify run's artifact (kept 90 days) |
+| `retag-release.yml` | rewrite the tag message (what the Tags page shows) from the changelog; release & files untouched |
 
 > **New release:** first add a `## vX.Y` section (✨ What's new / 🔧 What's fixed) to `CHANGELOG.md` **and** `CHANGELOG.en.md`. Verify takes the version + release notes from there, and stops if the two files disagree. **Every version keeps its own release and is never deleted**; Verify refuses a version already on Releases (run it by hand with `replace` if you really mean to overwrite).
 | `extract-stock.yml` | download the official ROM & extract the stock blobs (**manual; heavy — 6.3 GB**) |

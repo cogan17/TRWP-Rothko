@@ -262,6 +262,7 @@ jobs:
             echo "::error title=Pre-release gagal::$(tr '\n' ' ' </tmp/rel.err | sed 's/%/%25/g')"
             exit 1
           fi
+          (cd repo && .github/scripts/annotate_tag.sh "$BUILD_VER" "$VERSION" "$GH_REPO")
           echo "::notice title=Pre-release::$BUILD_VER · $VERSION -> $zip"
 
       - uses: actions/upload-artifact@v4

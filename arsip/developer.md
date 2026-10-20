@@ -65,6 +65,7 @@ Relink list TWRP membawa lib AIDL **V1**, padahal vold kini menaut keystore2-**V
 | `verify-image.yml` | repack jadi vendor_boot dua-fragmen seperti stok, jalankan gate struktur, kemas zip end-user, tandatangani (attestation), lalu terbitkan pre-release. **Jalankan via `workflow_dispatch` dari branch kerja** (Pelajaran 2) |
 | `update-twrp-sources.yml` | segarkan kunci sumber |
 | `republish-release.yml` | terbitkan ulang versi lama dari artifact run Verify (disimpan 90 hari) |
+| `retag-release.yml` | perbarui pesan tag (yang tampil di halaman Tags) dari changelog; rilis & file tidak disentuh |
 
 > **Rilis baru:** tambahkan dulu bagian `## vX.Y` (✨ Baru / 🔧 Perbaikan) di `CHANGELOG.md` **dan** `CHANGELOG.en.md`. Verify mengambil versi + catatan rilis dari situ, dan berhenti kalau versi kedua file berbeda. **Setiap versi punya rilis sendiri dan tidak pernah dihapus**; Verify menolak versi yang sudah ada di Releases (jalankan manual dengan `replace` kalau memang sengaja menimpa).
 | `extract-stock.yml` | unduh ROM resmi & ekstrak blob stok (**manual; berat — 6.3 GB**) |
