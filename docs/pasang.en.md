@@ -74,4 +74,4 @@ Next: [how to enter TWRP →](masuk-twrp.en.md)
 ## ⚠️ Important
 
 - Install **only** files made for **rothko (14T Pro)** — never from another phone.
-- `1-PASANG-TWRP.bat` uses a plain `fastboot reboot` (not `reboot recovery`) on purpose — see [why](../arsip/developer.md#8-masuk-recovery) (Indonesian).
+- `1-PASANG-TWRP.bat` uses a plain `fastboot reboot` (not `reboot recovery`) on purpose — see [why](../arsip/developer.en.md#8-entering-recovery).

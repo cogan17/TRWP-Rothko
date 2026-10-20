@@ -26,6 +26,6 @@ su -c 'reboot recovery'
 
 ## ⚠️ Don't use "reboot recovery" while TWRP is misbehaving
 
-`reboot recovery` writes a **BCB** flag to the `misc` partition. If TWRP crashes, the phone can **bootloop** into it over and over. With a working TWRP this is safe — TWRP clears the flag when it starts. Technical details: [Developer notes → Entering recovery](../arsip/developer.md#8-masuk-recovery) (Indonesian).
+`reboot recovery` writes a **BCB** flag to the `misc` partition. If TWRP crashes, the phone can **bootloop** into it over and over. With a working TWRP this is safe — TWRP clears the flag when it starts. Technical details: [Developer notes → Entering recovery](../arsip/developer.en.md#8-entering-recovery).
 
 To leave TWRP → **Reboot → System**.

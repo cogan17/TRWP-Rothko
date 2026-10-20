@@ -51,4 +51,4 @@ TWRP for rothko in this repo is built and released automatically by GitHub Actio
 | **[XiaomiFirmwareUpdater](https://github.com/XiaomiFirmwareUpdater)** | Official ROM catalog |
 | **Xiaomi & MediaTek** | Firmware, kernel modules and vendor blobs — taken from the official ROM, property of their respective owners |
 
-Want to use this tree for your own repo? Go ahead — keep the credits above, and read the [technical notes](../arsip/developer.md) (Indonesian) first.
+Want to use this tree for your own repo? Go ahead — keep the credits above, and read the [technical notes](../arsip/developer.en.md) first.

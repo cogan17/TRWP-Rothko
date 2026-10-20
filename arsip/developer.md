@@ -1,6 +1,6 @@
 # 🛠️ Catatan Developer & Pelajaran
 
-[← Kembali ke README](../README.md)
+[← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](developer.en.md)
 
 > 📦 **Arsip teknis** — tidak perlu dibaca end user.
 
@@ -62,7 +62,7 @@ Relink list TWRP membawa lib AIDL **V1**, padahal vold kini menaut keystore2-**V
 | Workflow | Fungsi |
 |---|---|
 | `build-twrp.yml` | sync manifest TWRP 14.1 (dikunci `twrp-sources.lock.xml`), terapkan `patches/`, build `vendorbootimage`, jalankan `recovery_deps.py` |
-| `verify-image.yml` | repack jadi vendor_boot dua-fragmen seperti stok, jalankan gate struktur, kemas zip end-user. **Jalankan via `workflow_dispatch` dari branch kerja** (Pelajaran 2) |
+| `verify-image.yml` | repack jadi vendor_boot dua-fragmen seperti stok, jalankan gate struktur, kemas zip end-user, tandatangani (attestation), lalu terbitkan pre-release. **Jalankan via `workflow_dispatch` dari branch kerja** (Pelajaran 2) |
 | `update-twrp-sources.yml` | segarkan kunci sumber |
 | `extract-stock.yml` | unduh ROM resmi & ekstrak blob stok (**manual; berat — 6.3 GB**) |
 
