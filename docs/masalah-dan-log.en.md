@@ -35,5 +35,5 @@ Both save the results to your PC's **`Downloads`** folder, then open the folder 
 |---|---|---|
 | Bootloop on the Mi logo | broken image / wrong package | [Back to stock](kembali-ke-stok.en.md) |
 | "Failed to decrypt" / pattern fails | protector / pattern | [Encryption & Pattern](enkripsi-dan-pola.en.md) |
-| Touchscreen doesn't respond | THP touch mode | [Developer notes §6](../arsip/developer.md#6-touch-focaltech-mulai-di-mode-thp) (Indonesian) |
+| Touchscreen doesn't respond | THP touch mode | [Developer notes §6](../arsip/developer.en.md#6-touch-focaltech-starts-in-thp-mode) |
 | Download/DCIM empty | data not decrypted yet | unlock with your pattern first |

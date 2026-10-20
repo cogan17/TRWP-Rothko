@@ -27,4 +27,4 @@ Repeated wrong attempts can trigger a **temporary lockout** (gatekeeper throttli
 
 ## Why is this tricky on this phone? (short version)
 
-HyperOS keeps the main key in **Weaver** (an NXP security chip) that recovery can't access, but it also stores a **Gatekeeper** protector for the same pattern. TWRP uses that Gatekeeper path. Technical details: [Developer notes](../arsip/developer.md#4-hyperos-lskf-weaver-aktif-gatekeeper-cadangan) (Indonesian).
+HyperOS keeps the main key in **Weaver** (an NXP security chip) that recovery can't access, but it also stores a **Gatekeeper** protector for the same pattern. TWRP uses that Gatekeeper path. Technical details: [Developer notes](../arsip/developer.en.md#4-hyperos-lskf-weaver-active-gatekeeper-as-backup).
