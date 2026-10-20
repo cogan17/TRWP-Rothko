@@ -19,7 +19,7 @@ plug in the cable → choose **File Transfer (MTP)** → copy the folders to you
 ## Key partitions (init_boot, boot, super)
 
 1. In TWRP, open **Backup**.
-2. Tick the partitions to back up — usually **Boot**, **Init_boot**, **Super**.
+2. Tick the partitions to back up — usually **boot**, **init_boot**, **super**.
 3. Swipe to start.
 4. The result is saved in `TWRP/BACKUPS` on internal storage.
 

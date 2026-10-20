@@ -110,7 +110,7 @@
     <li>Ikuti petunjuk di layar hitam. Tunggu sampai tertulis <b>BERHASIL</b> — HP akan menyala sendiri ke Android.</li>
   </ol>
   <div class="box ok">Kalau layar menampilkan "HP terdeteksi: rothko" lalu "BERHASIL", pemasangan sukses.</div>
-  <p><b>Sudah punya TWRP?</b> Lewat PC: masuk TWRP, colok kabel, klik dua kali <span class="file">5-UPDATE-LEWAT-TWRP.bat</span>. Tanpa PC: simpan <span class="file">@TWRP_IMG@</span> di HP, lalu di TWRP pilih <b>Install → Install Image</b> → pilih file itu → <b>Vendor Boot Image</b> → geser. Wajib <b>Vendor Boot</b>, jangan Boot / Init_boot.</p>
+  <p><b>Sudah punya TWRP?</b> Lewat PC: masuk TWRP, colok kabel, klik dua kali <span class="file">5-UPDATE-LEWAT-TWRP.bat</span>. Tanpa PC: simpan <span class="file">@TWRP_IMG@</span> di HP, lalu di TWRP pilih <b>Install → Install Image</b> → pilih file itu → <b>vendor_boot</b> → geser. Wajib <b>vendor_boot</b>, jangan boot / init_boot.</p>
 </div>
 
 <h2 id="masuk"><span class="n">3.</span> Masuk ke TWRP</h2>
@@ -146,7 +146,7 @@
   <p><b>Cadangkan partisi penting (init_boot, boot, dll):</b></p>
   <ol>
     <li>Di TWRP, buka menu <b>Backup</b>.</li>
-    <li>Centang partisi yang mau dicadangkan (mis. <b>Boot</b>, <b>Init_boot</b>, <b>Super</b>).</li>
+    <li>Centang partisi yang mau dicadangkan (mis. <b>boot</b>, <b>init_boot</b>, <b>super</b>).</li>
     <li>Geser untuk memulai. Hasilnya tersimpan di folder <code>TWRP/BACKUPS</code>.</li>
   </ol>
   <div class="box ok">Simpan hasil backup ke PC/flashdisk juga, biar aman kalau HP bermasalah.</div>
@@ -160,7 +160,7 @@
     <li>Colok kabel, lalu jalankan <span class="file">2-KEMBALIKAN-STOK.bat</span>.</li>
     <li>Tunggu sampai <b>BERHASIL</b>. HP menyala ulang ke HyperOS normal.</li>
   </ol>
-  <p><b>Tanpa PC</b> (kalau TWRP masih bisa dibuka): TWRP → <b>Install → Install Image</b> → <span class="file">@STOCK_IMG@</span> → <b>Vendor Boot Image</b> → geser → Reboot → System.</p>
+  <p><b>Tanpa PC</b> (kalau TWRP masih bisa dibuka): TWRP → <b>Install → Install Image</b> → <span class="file">@STOCK_IMG@</span> → <b>vendor_boot</b> → geser → Reboot → System.</p>
   <div class="box warn">Kalau HP sempat <b>bootloop</b> (muter di logo Mi), ini cara memperbaikinya:
   paksa mati (tahan Power ~15 detik), masuk FASTBOOT, jalankan <span class="file">2-KEMBALIKAN-STOK.bat</span>.</div>
 </div>

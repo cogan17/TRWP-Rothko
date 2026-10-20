@@ -40,10 +40,10 @@ Next: [how to enter TWRP →](masuk-twrp.en.md)
 1. On the phone, open **[Releases](https://github.com/cogan17/TWRP-14T-PRO/releases)** → download only **`TWRP-rothko-<version>.img`** (no zip needed). The version must **match** your HyperOS (*Settings → About phone*).
 2. [Enter TWRP](masuk-twrp.en.md) → unlock with your [pattern](enkripsi-dan-pola.en.md).
 3. **Install** → **Install Image** button → open the `Download` folder → pick `TWRP-rothko-<version>.img`.
-4. Choose **Vendor Boot Image** → swipe to flash.
+4. Choose **vendor_boot** → swipe to flash.
 5. **Reboot → Recovery.** Recent builds include `/BUILD-INFO.txt` (see *Advanced → File Manager*) with the build date.
 
-> ⚠️ You must choose **Vendor Boot Image** — **not** Boot / Init_boot. Wrong partition = bootloop.
+> ⚠️ You must choose **vendor_boot** — **not** boot / init_boot. Wrong partition = bootloop.
 
 > 💡 Also download **`STOK-vendor_boot-<version>.img`** (*stock*) and keep it on the phone. If Android won't start but TWRP still opens, flash the STOK file the same way. If TWRP won't open either → use a PC ([Back to stock](kembali-ke-stok.en.md)).
 

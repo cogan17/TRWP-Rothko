@@ -32,7 +32,7 @@ SUDAH PUNYA TWRP? CARA UPDATE (tanpa FASTBOOT)
   Lewat PC : masuk TWRP (Power + Volume Atas), sambungkan kabel,
              klik dua kali 5-UPDATE-LEWAT-TWRP.bat.
   Tanpa PC : salin @TWRP_IMG@ ke HP, lalu di TWRP pilih
-             Install > Install Image > file itu > Vendor Boot Image.
+             Install > Install Image > file itu > vendor_boot.
 
 KALAU HP BOOTLOOP ATAU ADA MASALAH
   1. Matikan HP (tahan Power 10-15 detik).
