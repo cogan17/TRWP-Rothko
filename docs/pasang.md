@@ -29,7 +29,11 @@ Lanjut: [cara masuk TWRP →](masuk-twrp.md)
 
 ---
 
-## 🔄 Sudah punya TWRP? Update lewat TWRP (tanpa PC)
+## 🔄 Sudah punya TWRP? Update tanpa FASTBOOT
+
+**Lewat PC:** [masuk TWRP](masuk-twrp.md), colok kabel, lalu klik dua kali **`5-UPDATE-LEWAT-TWRP.bat`** dari paket (ekstrak ke folder `platform-tools` seperti biasa). Skrip mengecek file & HP, menulis TWRP, lalu memeriksa ulang hasil tulisannya.
+
+**Tanpa PC:**
 
 1. Di HP, buka **[Releases](https://github.com/cogan17/TWRP-14T-PRO/releases)** → unduh **`TWRP-rothko-<versi>.img`** saja (tidak perlu zip). Versinya harus **sama** dengan HyperOS-mu (*Setelan → Tentang ponsel*).
 2. [Masuk TWRP](masuk-twrp.md) → buka kunci dengan [pola](enkripsi-dan-pola.md).
@@ -61,6 +65,8 @@ Lanjut: [cara masuk TWRP →](masuk-twrp.md)
 | `1-PASANG-TWRP.bat` | Pasang TWRP |
 | `2-KEMBALIKAN-STOK.bat` | [Kembali ke stok](kembali-ke-stok.md) |
 | `3-AMBIL-LOG.bat` / `4-LOG-BOOTLOOP.bat` | [Ambil log](masalah-dan-log.md) |
+| `5-UPDATE-LEWAT-TWRP.bat` | Update TWRP dari PC saat HP sudah di TWRP |
+| `twrp-update.sh` | Dipakai otomatis oleh skrip 5 |
 | `PANDUAN-TWRP.html` | Panduan offline |
 
 ## ⚠️ Penting
