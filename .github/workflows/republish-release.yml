@@ -1,0 +1,73 @@
+name: Republish release (rothko)
+
+# Publishes a version again from the package a past "Verify TWRP image" run kept as an artifact,
+# e.g. versions released before every version got its own release. Manual only; never overwrites.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, as in CHANGELOG.md (e.g. v1.0)'
+        required: true
+      verify_run_id:
+        description: 'Run id of the "Verify TWRP image" run that made that package'
+        required: true
+
+permissions:
+  actions: read
+  contents: write
+  # same signature as a fresh release (gh attestation verify)
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  republish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VER: ${{ inputs.version }}
+      RUN: ${{ inputs.verify_run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.verify_run_id }}
+          github-token: ${{ github.token }}
+          pattern: PAKET-TWRP-rothko-*
+          path: dist
+          merge-multiple: true
+
+      - name: Package and notes
+        run: |
+          if gh release view "$VER" >/dev/null 2>&1; then
+            echo "::error title=Sudah ada::$VER is already on Releases"
+            exit 1
+          fi
+          img=$(ls dist/TWRP-rothko-*.img); fw=${img#dist/TWRP-rothko-}; fw=${fw%.img}
+          [ -f "dist/STOK-vendor_boot-$fw.img" ] || { echo "::error::no STOK-vendor_boot-$fw.img in that run's package"; exit 1; }
+          command -v zip >/dev/null 2>&1 || { sudo apt-get update -q && sudo apt-get install -y -q zip; }
+          (cd dist && zip -qr "../PAKET-TWRP-rothko-$fw.zip" .)
+          ts=$(sha256sum "$img" | cut -d' ' -f1)
+          (cd repo && .github/scripts/release_notes.sh "$VER" "$fw" "$ts" "$GH_REPO") > notes.md
+          echo "FW=$fw" >> "$GITHUB_ENV"
+          echo "SHA=$(gh api "repos/$GH_REPO/actions/runs/$RUN" --jq .head_sha)" >> "$GITHUB_ENV"
+
+      - uses: actions/attest@v4
+        with:
+          subject-path: |
+            PAKET-TWRP-rothko-${{ env.FW }}.zip
+            dist/TWRP-rothko-${{ env.FW }}.img
+
+      - name: Publish
+        run: |
+          gh release create "$VER" "PAKET-TWRP-rothko-$FW.zip" "dist/TWRP-rothko-$FW.img" "dist/STOK-vendor_boot-$FW.img" \
+            --target "$SHA" --prerelease --title "$VER · $FW" --notes-file notes.md
+          echo "::notice title=Republished::$VER · $FW from verify run $RUN ($SHA)"
