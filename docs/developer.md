@@ -2,7 +2,9 @@
 
 [← Kembali ke README](../README.md)
 
-Untuk siapa pun yang **membangun, merawat, atau mem-fork** tree ini.
+> 📦 **Arsip teknis** — tidak perlu dibaca end user.
+
+Untuk siapa pun yang **membangun, merawat, atau mem-fork** tree ini — **bebas disalin & disesuaikan** untuk repo kalian sendiri.
 **Baca bagian Pelajaran dulu** — itu kesalahan yang sudah kami buat, biar kamu tidak mengulanginya.
 
 ---
