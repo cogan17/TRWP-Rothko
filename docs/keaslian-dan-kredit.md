@@ -41,7 +41,7 @@ TWRP rothko di repo ini dibangun dan dirilis otomatis oleh GitHub Actions dari *
 
 | Siapa | Kontribusi |
 |---|---|
-| **JonesqPacMan** | Device tree asal rothko ("Initial Release", 21 Sep 2025) — dasar repo ini |
+| **[JonesqPacMan](https://github.com/JonesqPacMan)** | Device tree asal rothko: [android_device_xiaomi_rothko_twrp](https://github.com/JonesqPacMan/android_device_xiaomi_rothko_twrp) ("Initial Release", 21 Sep 2025). Repo ini melanjutkan langsung dari commit terakhirnya (`b246a04`) |
 | **Cogan17** | Maintainer: port ke HyperOS 3 / Android 16, dekripsi pola (Gatekeeper), vendor_boot dua-fragmen, sinkron firmware, paket & skrip end user, CI dan rilis |
 | **[TeamWin Recovery Project](https://twrp.me)** | TWRP itu sendiri |
 | **[minimal-manifest-twrp](https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp)** | Manifest sumber build |

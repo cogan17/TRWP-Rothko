@@ -65,6 +65,6 @@
 ---
 
 <p align="center">
-  Maintainer <b>Cogan17</b> &nbsp;·&nbsp; tree asal <b>JonesqPacMan</b> &nbsp;·&nbsp; <b>TeamWin Recovery Project</b>
+  Maintainer <b>Cogan17</b> &nbsp;·&nbsp; tree asal <a href="https://github.com/JonesqPacMan/android_device_xiaomi_rothko_twrp"><b>JonesqPacMan</b></a> &nbsp;·&nbsp; <b>TeamWin Recovery Project</b>
   <br><a href="docs/keaslian-dan-kredit.md">🔏 Keaslian & kredit lengkap</a>
 </p>
