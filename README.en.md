@@ -37,12 +37,6 @@
 | 🔐 **[Encryption & Pattern](docs/enkripsi-dan-pola.md)** | Unlock encrypted data |
 | 🩺 **[Issues & Logs](docs/masalah-dan-log.md)** | When something goes wrong |
 
-### 🛠️ For Developers
-
-**[Notes & lessons from building this tree →](docs/developer.md)**
-
-*The mistakes we already made — so you don't repeat them.*
-
 ---
 
 <details>

@@ -34,12 +34,6 @@
 | 🔐 **[Enkripsi & Pola](docs/enkripsi-dan-pola.md)** | Buka data terkunci |
 | 🩺 **[Masalah & Log](docs/masalah-dan-log.md)** | Kalau ada kendala |
 
-### 🛠️ Untuk Developer
-
-**[Catatan & pelajaran membangun tree ini →](docs/developer.md)**
-
-*Berisi kesalahan yang sudah kami buat — biar kamu tidak mengulanginya.*
-
 ---
 
 <details>
