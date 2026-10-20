@@ -29,6 +29,7 @@
 | 📥 **[Pasang TWRP](docs/pasang.md)** | Flash lewat platform-tools + `.bat` |
 | 🔑 **[Masuk TWRP](docs/masuk-twrp.md)** | Tombol atau Termux |
 | 💾 **[Backup](docs/backup.md)** | Data & partisi penting |
+| 🔄 **[Update HyperOS](docs/update-hos.md)** | Update tanpa kehilangan data |
 | ↩️ **[Kembali ke Stok](docs/kembali-ke-stok.md)** | Batalkan TWRP / perbaiki bootloop |
 | 🔐 **[Enkripsi & Pola](docs/enkripsi-dan-pola.md)** | Buka data terkunci |
 | 🩺 **[Masalah & Log](docs/masalah-dan-log.md)** | Kalau ada kendala |
