@@ -2,7 +2,7 @@
 
 [← Back to README](../README.en.md) · <img src="https://flagcdn.com/24x18/id.png" width="22" alt=""> [Bahasa Indonesia](keaslian-dan-kredit.md)
 
-TWRP for rothko in this repo is built and released automatically by GitHub Actions from **[cogan17/TWRP-14T-PRO](https://github.com/cogan17/TWRP-14T-PRO)**. Every release file is **digitally signed**, so anyone can prove where it came from.
+TWRP for rothko in this repo is built and released automatically by GitHub Actions from **[cogan17/TWRP-14T-PRO](https://github.com/cogan17/TWRP-14T-PRO)**. The release package (zip) and its TWRP image are **digitally signed**, so anyone can prove where they came from. (`STOK-vendor_boot` is deliberately not signed — it's Xiaomi's original file, not made by this repo.)
 
 > What this proves is that **this TWRP build/port for rothko** was built and released from cogan17's repo. TWRP itself is the work of TeamWin and the contributors listed under [Credits](#-credits).
 

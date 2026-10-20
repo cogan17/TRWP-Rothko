@@ -2,7 +2,7 @@
 
 [← Kembali ke README](../README.md) · <img src="https://flagcdn.com/24x18/gb.png" width="22" alt=""> [English](keaslian-dan-kredit.en.md)
 
-TWRP rothko di repo ini dibangun dan dirilis otomatis oleh GitHub Actions dari **[cogan17/TWRP-14T-PRO](https://github.com/cogan17/TWRP-14T-PRO)**. Setiap file rilis **ditandatangani secara digital**, jadi siapa pun bisa membuktikan asal-usulnya.
+TWRP rothko di repo ini dibangun dan dirilis otomatis oleh GitHub Actions dari **[cogan17/TWRP-14T-PRO](https://github.com/cogan17/TWRP-14T-PRO)**. Paket rilis (zip) dan image TWRP-nya **ditandatangani secara digital**, jadi siapa pun bisa membuktikan asal-usulnya. (`STOK-vendor_boot` tidak ikut ditandatangani — itu file asli Xiaomi, bukan buatan repo ini.)
 
 > Yang dibuktikan adalah **build/port TWRP untuk rothko** ini dibuat dan dirilis dari repo cogan17. TWRP sendiri adalah karya TeamWin dan para kontributor di [Kredit](#-kredit).
 
