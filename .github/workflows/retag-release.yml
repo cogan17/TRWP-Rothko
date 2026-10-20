@@ -1,0 +1,35 @@
+name: Update release tag messages (rothko)
+
+# Rewrites the annotated tag of existing releases from the current CHANGELOG (the text GitHub's
+# Tags page shows). Release notes and files are not touched. Manual only.
+on:
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'Versions, space separated (e.g. v1.0 v1.1 v1.2)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  retag:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSIONS: ${{ inputs.versions }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Annotate tags
+        run: |
+          for v in $VERSIONS; do
+            # firmware from the release title "vX.Y · <firmware>"
+            fw=$(gh release view "$v" --json name --jq '.name | split(" · ")[1]')
+            .github/scripts/annotate_tag.sh "$v" "$fw" "$GH_REPO"
+          done

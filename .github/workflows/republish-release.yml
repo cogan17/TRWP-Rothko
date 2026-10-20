@@ -70,4 +70,5 @@ jobs:
         run: |
           gh release create "$VER" "PAKET-TWRP-rothko-$FW.zip" "dist/TWRP-rothko-$FW.img" "dist/STOK-vendor_boot-$FW.img" \
             --target "$SHA" --prerelease --title "$VER · $FW" --notes-file notes.md
+          (cd repo && .github/scripts/annotate_tag.sh "$VER" "$FW" "$GH_REPO")
           echo "::notice title=Republished::$VER · $FW from verify run $RUN ($SHA)"
